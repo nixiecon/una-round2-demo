@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UNA Events Calendar</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="events-app">
+
+    <!-- Header -->
+    <header class="cal-header">
+      <h1 class="cal-title">
+        Events
+        <span class="cal-title-sep">|</span>
+        <span id="month-label">—</span>
+      </h1>
+      <div class="view-toggle" role="tablist" aria-label="View mode">
+        <button type="button" class="view-toggle-btn" data-view="month" aria-pressed="true">Month</button>
+        <a class="view-toggle-btn" data-view="list" href="https://www.myuna.ca/events/list/" aria-pressed="false">List</a>
+      </div>
+    </header>
+
+    <!-- Search + Filters -->
+    <div class="search-row">
+      <input id="search-input" class="search-input" type="search" placeholder="Search events…" />
+    </div>
+
+    <button type="button" id="mobile-filters-toggle" class="mobile-filters-toggle" aria-expanded="false" aria-controls="filters">
+      <span>Filters</span>
+      <span class="mobile-filters-chevron" aria-hidden="true">▾</span>
+    </button>
+
+    <div id="filters" class="filters">
+      <div class="filter">
+        <span class="filter-label">Event Category</span>
+        <div class="multi-select" id="filter-category"
+             data-filter-key="category"
+             data-placeholder="All categories"
+             data-options='[]'></div>
+      </div>
+
+      <div class="filter">
+        <span class="filter-label">Venue</span>
+        <div class="multi-select" id="filter-venue"
+             data-filter-key="venue"
+             data-placeholder="All venues"
+             data-options='[]'></div>
+      </div>
+
+      <div class="filter">
+        <span class="filter-label">Organizer</span>
+        <div class="multi-select" id="filter-organizer"
+             data-filter-key="organizer"
+             data-placeholder="All organizers"
+             data-options='[]'></div>
+      </div>
+    </div>
+
+    <!-- Month navigation -->
+    <nav class="month-nav" aria-label="Month navigation">
+      <button type="button" id="prev-month" class="nav-btn nav-btn-prev">
+        <span class="nav-btn-icon" aria-hidden="true">‹</span>
+        <span class="nav-btn-label">Previous</span>
+      </button>
+      <button type="button" id="today-btn" class="nav-btn nav-btn-today">This Month</button>
+      <button type="button" id="next-month" class="nav-btn nav-btn-next">
+        <span class="nav-btn-label">Next</span>
+        <span class="nav-btn-icon" aria-hidden="true">›</span>
+      </button>
+    </nav>
+
+    <!-- Day-of-week header strip -->
+    <div class="dow-header">
+      <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+    </div>
+
+    <!-- Month grid -->
+    <main id="month-grid" class="month-grid" aria-live="polite">
+      <!-- Populated by events-calendar.js -->
+    </main>
+
+    <!-- Empty state -->
+    <div id="empty-state" class="empty-state" hidden>
+      <p>No events match your filters.</p>
+    </div>
+
+    <!-- Bottom sheet for "+N more" overflow + mobile event details -->
+    <div id="day-sheet" class="mobile-sheet" hidden role="dialog" aria-modal="true" aria-labelledby="day-sheet-title">
+      <div class="mobile-sheet-backdrop" data-close-sheet></div>
+      <div class="mobile-sheet-panel">
+        <button type="button" class="mobile-sheet-close" data-close-sheet aria-label="Close">×</button>
+        <h2 id="day-sheet-title" class="mobile-sheet-title">—</h2>
+        <div id="day-sheet-content"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="sample-data.js"></script>
+  <script src="events-calendar.js"></script>
+</body>
+</html>

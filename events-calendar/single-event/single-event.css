@@ -1,0 +1,364 @@
+/* ============================================================
+   UNA Single Event Page — CSS-only redesign
+   Drops into WP Customizer → Additional CSS, or child theme.
+   Targets "The Events Calendar" plugin v6.x (legacy classes also
+   covered for safety against template fallbacks).
+
+   What this does (no PHP, no template overrides):
+     1. Reorders the single-event DOM via CSS `order` so
+        Date / Time / Location / Map / Add-to-Calendar appear
+        ABOVE the description.
+     2. Styles those four into a beige hero card with a UNA-green
+        left rule and prominent Add-to-Calendar button.
+     3. Sticks the hero card to the top on desktop scroll.
+     4. Stacks cleanly to a single column on mobile.
+
+   Brand tokens copied from
+   Projects/UNA Drop-In Calendar/styles.css (verbatim).
+   ============================================================ */
+
+:root {
+  /* UNA Greens */
+  --una-green:         #3B7267;
+  --una-green-lighter: #4D9AC9;
+  --una-green-darker:  #015990;
+
+  /* Bright Green Accent */
+  --bright-green:         #44BC9B;
+  --bright-green-lighter: #56DEB9;
+  --bright-green-darker:  #41A288;
+
+  /* Bright Yellow Accent */
+  --bright-yellow:         #E9E980;
+  --bright-yellow-lighter: #F7F7CC;
+  --bright-yellow-darker:  #E2E23B;
+
+  /* Neutrals */
+  --beige:    #F5F3EC;
+  --white:    #FFFFFF;
+  --charcoal: #1A1A1A;
+  --text:     #414042;
+
+  /* Greys */
+  --grey-50:  #F2F2F2;
+  --grey-100: #E8E8E8;
+  --grey-200: #D9D9D9;
+
+  --radius:    4px;
+  --radius-lg: 8px;
+  --shadow:    0 2px 8px rgba(26, 26, 26, 0.08);
+  --shadow-lg: 0 8px 24px rgba(26, 26, 26, 0.18);
+}
+
+/* ============================================================
+   1. Container — make single-event a flex column we can reorder
+   ============================================================ */
+
+.tribe-events-single,
+.single-tribe_events .tribe-events-pg-template,
+.single-tribe_events #tribe-events-pg-template {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================================================
+   2. DOM order via CSS `order` property
+   Lower number = appears earlier on the page.
+   ============================================================ */
+
+/* Back link stays at very top if present */
+.tribe-events-back,
+.tribe-events-c-nav,
+.tribe-events-event-categories-label { order: 0; }
+
+/* Title */
+.tribe-events-single-event-title,
+.tribe-events-single h1.entry-title { order: 1; }
+
+/* Featured image */
+.tribe-events-event-image,
+.tribe-events-single .tribe-events-event-image { order: 2; }
+
+/* Schedule line ("April 4 @ 9:30 am - 11:30 am") */
+.tribe-events-schedule { order: 3; }
+
+/* Hero card (meta + venue + add-to-cal) — promoted ABOVE description */
+.tribe-events-event-meta,
+.tribe-events-cal-links,
+.tribe-events-c-subscribe-dropdown,
+.tribe-events-c-subscribe-dropdown__container,
+.tribe-events-meta-group-gmap { order: 4; }
+
+/* Description body */
+.tribe-events-single-event-description,
+.tribe-events-content { order: 5; }
+
+/* Footer / nav between events */
+#tribe-events-footer,
+.tribe-events-single-section.tribe-events-event-meta-secondary { order: 6; }
+
+/* ============================================================
+   3. Hero card — wrap the meta block visually
+   We can't add a wrapper div via CSS, so we style the existing
+   .tribe-events-event-meta container as the card. The Add-to-Cal
+   button (which lives outside on most templates) is pulled in
+   visually via negative margin + matching background.
+   ============================================================ */
+
+.tribe-events-event-meta {
+  background: var(--beige);
+  border-left: 4px solid var(--una-green);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  margin: 24px 0 0 0;
+  box-shadow: var(--shadow);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px 32px;
+  font-family: "proxima-nova", "Proxima Nova", -apple-system, BlinkMacSystemFont,
+               "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: var(--text);
+}
+
+/* Section titles inside the hero ("DETAILS", "VENUE", "ORGANIZER") */
+.tribe-events-event-meta .tribe-events-single-section-title,
+.tribe-events-event-meta h2,
+.tribe-events-event-meta h3 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--una-green);
+  margin: 0 0 8px 0;
+  font-weight: 700;
+}
+
+/* Detail key/value pairs */
+.tribe-events-event-meta dt,
+.tribe-events-event-meta .tribe-events-meta-group__title {
+  font-weight: 700;
+  color: var(--charcoal);
+  margin-top: 8px;
+}
+
+.tribe-events-event-meta dd {
+  margin: 0 0 4px 0;
+  color: var(--text);
+}
+
+/* Links inside the hero */
+.tribe-events-event-meta a {
+  color: var(--una-green);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s ease;
+}
+.tribe-events-event-meta a:hover {
+  border-bottom-color: var(--una-green);
+}
+
+/* Map gets its own column on desktop */
+.tribe-events-event-meta .tribe-events-meta-group-venue,
+.tribe-events-event-meta .tribe-events-venue-map,
+.tribe-events-event-meta .tribe-events-meta-group-gmap {
+  grid-column: 2;
+}
+
+.tribe-events-event-meta .tribe-events-meta-group-details,
+.tribe-events-event-meta .tribe-events-meta-group-organizer {
+  grid-column: 1;
+}
+
+/* Map embed sizing */
+.tribe-events-event-meta iframe,
+.tribe-events-event-meta .tribe-events-venue-map iframe {
+  width: 100%;
+  min-height: 240px;
+  border: 0;
+  border-radius: var(--radius);
+}
+
+/* ============================================================
+   4. Add-to-Calendar — make it the hero CTA
+   Two flavors: legacy .tribe-events-cal-links and v6
+   .tribe-events-c-subscribe-dropdown.
+   ============================================================ */
+
+.tribe-events-cal-links,
+.tribe-events-c-subscribe-dropdown,
+.tribe-events-c-subscribe-dropdown__container {
+  margin: 16px 0 0 0;
+  padding: 16px 20px;
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--grey-100);
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+.tribe-events-cal-links a,
+.tribe-events-c-subscribe-dropdown__button,
+.tribe-events-button {
+  display: inline-block;
+  background: var(--una-green) !important;
+  color: var(--white) !important;
+  padding: 10px 20px !important;
+  border-radius: var(--radius) !important;
+  font-weight: 600;
+  text-decoration: none !important;
+  border: none !important;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.15s ease, transform 0.05s ease;
+}
+
+.tribe-events-cal-links a:hover,
+.tribe-events-c-subscribe-dropdown__button:hover,
+.tribe-events-button:hover {
+  background: var(--una-green-darker) !important;
+}
+
+.tribe-events-cal-links a:active,
+.tribe-events-c-subscribe-dropdown__button:active {
+  transform: translateY(1px);
+}
+
+/* Dropdown panel (when "Add to calendar" is clicked) */
+.tribe-events-c-subscribe-dropdown__content {
+  background: var(--white);
+  border: 1px solid var(--grey-100);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 8px 0;
+  z-index: 100;
+}
+
+.tribe-events-c-subscribe-dropdown__list-item a {
+  background: transparent !important;
+  color: var(--text) !important;
+  padding: 10px 16px !important;
+  border-radius: 0 !important;
+  display: block;
+  text-align: left;
+}
+
+.tribe-events-c-subscribe-dropdown__list-item a:hover {
+  background: var(--beige) !important;
+  color: var(--una-green) !important;
+}
+
+/* ============================================================
+   5. Description body — looks more like an article
+   ============================================================ */
+
+.tribe-events-single-event-description,
+.tribe-events-content {
+  margin-top: 32px;
+  font-family: "proxima-nova", "Proxima Nova", -apple-system, BlinkMacSystemFont,
+               "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.tribe-events-single-event-description p {
+  margin: 0 0 1em 0;
+}
+
+/* ============================================================
+   6. Title styling
+   ============================================================ */
+
+.tribe-events-single-event-title,
+.single-tribe_events h1.entry-title {
+  font-family: "proxima-nova", "Proxima Nova", -apple-system, BlinkMacSystemFont,
+               "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: var(--charcoal);
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.15;
+  margin: 0 0 12px 0;
+}
+
+.tribe-events-schedule h2 {
+  color: var(--una-green);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+}
+
+/* ============================================================
+   7. Sticky hero on desktop
+   Optional — comment this block out if Glenda doesn't want it.
+   ============================================================ */
+
+@media (min-width: 1024px) {
+  .tribe-events-event-meta {
+    position: sticky;
+    top: 80px; /* adjust if your theme has a fixed header taller than this */
+    align-self: start;
+  }
+}
+
+/* ============================================================
+   8. Mobile — collapse hero card to single column
+   ============================================================ */
+
+@media (max-width: 767px) {
+  .tribe-events-event-meta {
+    grid-template-columns: 1fr;
+    padding: 20px;
+    gap: 16px;
+  }
+
+  .tribe-events-event-meta .tribe-events-meta-group-details,
+  .tribe-events-event-meta .tribe-events-meta-group-organizer,
+  .tribe-events-event-meta .tribe-events-meta-group-venue,
+  .tribe-events-event-meta .tribe-events-meta-group-gmap {
+    grid-column: 1;
+  }
+
+  .tribe-events-event-meta iframe {
+    min-height: 200px;
+  }
+
+  .tribe-events-cal-links,
+  .tribe-events-c-subscribe-dropdown__container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tribe-events-cal-links a,
+  .tribe-events-c-subscribe-dropdown__button {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Disable sticky on mobile — it gets in the way */
+  .tribe-events-event-meta {
+    position: static;
+  }
+}
+
+/* ============================================================
+   9. De-emphasize organizer (UNA is always the organizer here)
+   ============================================================ */
+
+.tribe-events-event-meta .tribe-events-meta-group-organizer {
+  font-size: 0.875rem;
+  opacity: 0.85;
+}
+
+/* ============================================================
+   10. Hide the duplicate schedule strip if it appears below the
+       title AND in the hero card — keep the one in the hero.
+   ============================================================ */
+
+.tribe-events-single .tribe-events-schedule + .tribe-events-event-meta
+  .tribe-events-meta-group-details dt:first-child {
+  /* no-op — placeholder hook in case we need to dedupe later */
+}
+
+/* End */
