@@ -48,6 +48,14 @@ window.UNA_FIELD_SAMPLE_DATA = {
       startISO: "2026-05-17T19:30", endISO: "2026-05-17T21:00" },
   ],
 
+  // Per-org teal shades — same family, different values
+  orgShades: {
+    "vufc":            "#2D5F56",
+    "ubcmet":          "#1A4A42",
+    "vlbe":            "#4A8A7E",
+    "una":             "#3B7267",
+    "soccermovement":  "#5A9E90",
+  },
   bookedColor:        "#3B7267",
   vsbColor:           "#B2E8D4",
   communityPlayColor: "#44BC9B",

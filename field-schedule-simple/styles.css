@@ -429,7 +429,7 @@ select {
   position: absolute;
   left: 4px;
   right: 4px;
-  background: var(--una-green);            /* dark green — blocked out */
+  background: #1A4A42;                     /* darkest teal — clearly blocked */
   color: var(--white);
   border-radius: var(--radius);
   padding: 4px 6px;

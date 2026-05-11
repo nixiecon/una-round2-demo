@@ -104,7 +104,9 @@
     return `${y}-${m}-${dd}T${time}`;
   }
 
-  function getBookedColor() {
+  function getBookedColor(orgKey) {
+    const shades = getData().orgShades;
+    if (shades && orgKey && shades[orgKey]) return shades[orgKey];
     return getData().bookedColor || '#3B7267';
   }
 
@@ -464,7 +466,7 @@
     block.className = 'booking';
     block.style.top = `${top}px`;
     block.style.height = `${Math.max(height, 28)}px`;
-    block.style.background = getBookedColor();
+    block.style.background = getBookedColor(booking.orgKey);
 
     block.innerHTML = `
       <div class="booking__org">${booking.org}</div>
