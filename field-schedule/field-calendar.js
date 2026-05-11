@@ -579,7 +579,7 @@
       if (height >= 40) div.textContent = 'Community Play Time';
       else if (height >= 18) div.textContent = 'CPT';
     } else {
-      div.className = 'cpt-overlay'; // same style, different label
+      div.className = 'available-overlay';
       if (height >= 40) div.textContent = 'Booking Available';
       else if (height >= 18) div.textContent = 'Available';
     }

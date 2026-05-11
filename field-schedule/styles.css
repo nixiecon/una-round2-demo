@@ -463,6 +463,26 @@ select {
   justify-content: center;
 }
 
+/* Booking Available gap fill */
+.available-overlay {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  background: rgba(200, 200, 200, 0.25);
+  border: 1px dashed var(--grey-200);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 4px 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-align: center;
+  pointer-events: none;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* ============ Legend ============ */
 
 .legend {

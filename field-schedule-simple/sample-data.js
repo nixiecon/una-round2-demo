@@ -58,7 +58,7 @@ window.UNA_FIELD_SAMPLE_DATA = {
   vsb: {
     days:        [1, 2, 3, 4, 5],
     timeStart:   "09:00",
-    timeEnd:     "17:30",
+    timeEnd:     "18:00",
     schoolYear: { startMonth: 9, startDay: 1, endMonth: 6, endDay: 30 },
   },
 };
