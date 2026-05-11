@@ -319,9 +319,7 @@
 
   function passesFilters(booking) {
     const { status } = state.filters;
-    if (org.length && !org.includes(booking.org)) return false;
-    if (status === 'booked') return true; // bookings always count
-    if (status === 'open') return false;   // hide bookings
+    if (status === 'open') return false;
     return true;
   }
 
