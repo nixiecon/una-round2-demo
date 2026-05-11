@@ -37,9 +37,9 @@ window.UNA_FIELD_SAMPLE_DATA = {
     { id: "1501", org: "Vancouver United FC", orgKey: "vufc",
       startISO: "2026-05-15T17:30", endISO: "2026-05-15T20:00" },
 
-    // Sat May 16 — VUFC 10am–8pm
+    // Sat May 16 — VUFC 9am–8pm
     { id: "1601", org: "Vancouver United FC", orgKey: "vufc",
-      startISO: "2026-05-16T10:00", endISO: "2026-05-16T20:00" },
+      startISO: "2026-05-16T09:00", endISO: "2026-05-16T20:00" },
 
     // Sun May 17 — same as Sun 10
     { id: "1701", org: "Vancouver United FC", orgKey: "vufc",
