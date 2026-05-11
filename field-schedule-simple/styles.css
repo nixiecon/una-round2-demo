@@ -443,44 +443,46 @@ select {
   letter-spacing: 0.04em;
 }
 
-/* Community Play Time gap fill */
-.cpt-overlay {
+/* Community Play Time — solid event block */
+.cpt-block {
   position: absolute;
   left: 4px;
   right: 4px;
-  background: rgba(68, 188, 155, 0.18);
-  border: 1px dashed var(--bright-green-darker);
+  background: var(--bright-green);
   border-radius: var(--radius);
-  color: var(--bright-green-darker);
   padding: 4px 6px;
-  font-size: 0.72rem;
+  color: var(--white);
+  font-size: 0.78rem;
+  line-height: 1.2;
   font-weight: 600;
-  text-align: center;
-  pointer-events: none;
-  z-index: 0;
+  box-shadow: var(--shadow);
+  overflow: hidden;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  z-index: 0;
 }
 
-/* Booking Available gap fill */
+/* Booking Available — bright yellow block */
 .available-overlay {
   position: absolute;
   left: 4px;
   right: 4px;
   background: #F5E06B;
-  border: 1px dashed #C4A600;
   border-radius: var(--radius);
-  color: #7A6E00;
   padding: 4px 6px;
-  font-size: 0.72rem;
+  color: #5C5200;
+  font-size: 0.78rem;
+  line-height: 1.2;
   font-weight: 600;
-  text-align: center;
-  pointer-events: none;
-  z-index: 0;
+  box-shadow: var(--shadow);
+  overflow: hidden;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid #C4A600;
+  z-index: 0;
 }
 
 /* ============ Legend ============ */

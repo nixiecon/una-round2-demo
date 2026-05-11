@@ -501,19 +501,31 @@
     div.style.height = `${height}px`;
 
     if (gap.type === 'spacer') {
-      // Tiny gap between evening bookings — no label, no styling
       return div;
-    } else if (gap.type === 'cpt') {
-      div.className = 'cpt-overlay';
-      if (height >= 40) div.textContent = 'Community Play Time';
-      else if (height >= 18) div.textContent = 'CPT';
+    }
+
+    const timeStr = formatMinToTime(gap.startMin) + ' – ' + formatMinToTime(gap.endMin);
+
+    if (gap.type === 'cpt') {
+      div.className = 'cpt-block';
+      div.innerHTML = '<div class="booking__org">Community Play Time</div>' +
+        '<div class="booking__time">' + timeStr + '</div>';
     } else {
       div.className = 'available-overlay';
-      if (height >= 40) div.textContent = 'Booking Available';
-      else if (height >= 18) div.textContent = 'Available';
+      div.innerHTML = '<div class="booking__org">Booking Available</div>' +
+        '<div class="booking__time">' + timeStr + '</div>';
     }
 
     return div;
+  }
+
+  function formatMinToTime(min) {
+    const h = Math.floor(min / 60);
+    const m = min % 60;
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = ((h + 11) % 12) + 1;
+    const mm = m === 0 ? '' : ':' + String(m).padStart(2, '0');
+    return h12 + mm + ' ' + ampm;
   }
 
   function getMinFromGridStart() {

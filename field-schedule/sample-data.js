@@ -47,12 +47,13 @@ window.UNA_FIELD_SAMPLE_DATA = {
       startISO: "2026-05-17T19:30", endISO: "2026-05-17T21:00" },
   ],
 
+  // Muted org colors — bookings fade so Booking Available pops
   orgColors: {
-    "una":             "#2E8B7A",
-    "vufc":            "#00407A",
-    "ubcmet":          "#0B1F3A",
-    "vlbe":            "#8C8C8C",
-    "soccermovement":  "#48B8D0",
+    "una":             "#6BA89D",
+    "vufc":            "#5A7F9A",
+    "ubcmet":          "#4A6070",
+    "vlbe":            "#A8A8A8",
+    "soccermovement":  "#7CBFCC",
   },
 
   operatingHours: { start: "09:00", end: "22:00" },
