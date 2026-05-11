@@ -483,11 +483,12 @@
   function renderVsbOverlay(vsbBlock) {
     const top = (vsbBlock.startMin - getMinFromGridStart()) * (HOUR_HEIGHT / 60);
     const height = (vsbBlock.endMin - vsbBlock.startMin) * (HOUR_HEIGHT / 60);
+    const timeStr = formatMinToTime(vsbBlock.startMin) + ' – ' + formatMinToTime(vsbBlock.endMin);
     const div = document.createElement('div');
     div.className = 'vsb-overlay';
     div.style.top = `${top}px`;
     div.style.height = `${height}px`;
-    div.textContent = 'Vancouver School Board';
+    div.innerHTML = 'Vancouver School Board<br><span style="font-weight:500;font-size:0.7rem;opacity:0.85">' + timeStr + '</span>';
     return div;
   }
 

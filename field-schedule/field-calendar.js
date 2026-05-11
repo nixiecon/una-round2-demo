@@ -32,7 +32,6 @@
     dateRange: document.getElementById('date-range'),
     grid: document.getElementById('field-grid'),
     legend: document.getElementById('legend'),
-    filterOrg: document.getElementById('filter-org'),
     filterStatus: document.getElementById('filter-status'),
     mobileFiltersToggle: document.getElementById('mobile-filters-toggle'),
     filtersPanel: document.getElementById('filters'),
@@ -49,7 +48,6 @@
     weekStart: getWeekStart(new Date()),
     mobileActiveDay: new Date().getDay(),
     filters: {
-      org: [],
       status: '',
     },
   };
@@ -57,8 +55,6 @@
   // ============ Bootstrap ============
 
   function init() {
-    populateOrgFilter();
-    initOrgMultiSelect();
     attachEventHandlers();
     render();
   }
@@ -123,91 +119,6 @@
 
   function getVsbConfig() {
     return getData().vsb || null;
-  }
-
-  // ============ Org filter ============
-
-  function populateOrgFilter() {
-    const bookings = getBookings();
-    const seen = new Map();
-    bookings.forEach(b => seen.set(b.orgKey, b.org));
-    const options = Array.from(seen.entries()).map(([key, label]) => ({ key, label }));
-    els.filterOrg.setAttribute('data-options',
-      JSON.stringify(options.map(o => o.label)));
-    // Keep a key↔label map for filter matching
-    state.orgKeyByLabel = {};
-    options.forEach(o => { state.orgKeyByLabel[o.label] = o.key; });
-  }
-
-  function initOrgMultiSelect() {
-    const root = els.filterOrg;
-    const placeholder = root.getAttribute('data-placeholder') || 'All';
-    const options = JSON.parse(root.getAttribute('data-options') || '[]');
-
-    function renderChips() {
-      root.innerHTML = '';
-      if (!state.filters.org.length) {
-        const ph = document.createElement('span');
-        ph.className = 'multi-select__placeholder';
-        ph.textContent = placeholder;
-        root.appendChild(ph);
-        return;
-      }
-      state.filters.org.forEach(label => {
-        const chip = document.createElement('span');
-        chip.className = 'multi-select__chip';
-        chip.innerHTML = label +
-          ' <button type="button" class="multi-select__chip-remove" aria-label="Remove">×</button>';
-        chip.querySelector('button').addEventListener('click', e => {
-          e.stopPropagation();
-          state.filters.org = state.filters.org.filter(l => l !== label);
-          renderChips();
-          render();
-        });
-        root.appendChild(chip);
-      });
-    }
-
-    let panel = null;
-    function openPanel() {
-      if (panel) return;
-      panel = document.createElement('div');
-      panel.className = 'multi-select__panel';
-      options.forEach(label => {
-        const opt = document.createElement('div');
-        opt.className = 'multi-select__option';
-        opt.setAttribute('aria-selected', state.filters.org.includes(label));
-        opt.innerHTML = `<input type="checkbox" ${state.filters.org.includes(label) ? 'checked' : ''} /> ${label}`;
-        opt.addEventListener('click', e => {
-          e.stopPropagation();
-          if (state.filters.org.includes(label)) {
-            state.filters.org = state.filters.org.filter(l => l !== label);
-          } else {
-            state.filters.org.push(label);
-          }
-          opt.setAttribute('aria-selected', state.filters.org.includes(label));
-          opt.querySelector('input').checked = state.filters.org.includes(label);
-          renderChips();
-          render();
-        });
-        panel.appendChild(opt);
-      });
-      root.appendChild(panel);
-    }
-
-    function closePanel() {
-      if (panel) { panel.remove(); panel = null; }
-    }
-
-    root.addEventListener('click', e => {
-      if (e.target.closest('.multi-select__chip')) return;
-      panel ? closePanel() : openPanel();
-    });
-    document.addEventListener('click', e => {
-      if (!root.contains(e.target)) closePanel();
-    });
-
-    renderChips();
   }
 
   // ============ Event handlers ============
@@ -407,7 +318,7 @@
   // ============ Filters ============
 
   function passesFilters(booking) {
-    const { org, status } = state.filters;
+    const { status } = state.filters;
     if (org.length && !org.includes(booking.org)) return false;
     if (status === 'booked') return true; // bookings always count
     if (status === 'open') return false;   // hide bookings
@@ -564,11 +475,12 @@
   function renderVsbOverlay(vsbBlock) {
     const top = (vsbBlock.startMin - getMinFromGridStart()) * (HOUR_HEIGHT / 60);
     const height = (vsbBlock.endMin - vsbBlock.startMin) * (HOUR_HEIGHT / 60);
+    const timeStr = formatMinToTime(vsbBlock.startMin) + ' – ' + formatMinToTime(vsbBlock.endMin);
     const div = document.createElement('div');
     div.className = 'vsb-overlay';
     div.style.top = `${top}px`;
     div.style.height = `${height}px`;
-    div.textContent = 'Vancouver School Board';
+    div.innerHTML = 'Vancouver School Board<br><span style="font-weight:500;font-size:0.7rem;opacity:0.85">' + timeStr + '</span>';
     return div;
   }
 
