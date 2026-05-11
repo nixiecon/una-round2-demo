@@ -476,7 +476,7 @@ select {
   position: absolute;
   left: 4px;
   right: 4px;
-  background: #FFE50C;
+  background: var(--bright-yellow-lighter);
   border-radius: var(--radius);
   padding: 4px 6px;
   color: #5C5200;
@@ -491,7 +491,7 @@ select {
   justify-content: center;
   text-align: center;
   gap: 2px;
-  border: 1px solid #C4A600;
+  border: 1px solid var(--bright-yellow-darker);
   z-index: 0;
 }
 
