@@ -510,10 +510,10 @@
     });
     if (cursor < opEnd) rawGaps.push([cursor, opEnd]);
 
-    const EVENING = 18 * 60;
+    const EVENING = 17 * 60 + 30; // 5:30 PM — earliest evening booking
     return rawGaps.map(([start, end]) => {
       const dur = end - start;
-      if (start >= EVENING && dur <= 30) {
+      if (dur <= 30 && start >= EVENING) {
         return { startMin: start, endMin: end, type: 'spacer' };
       }
       return {
