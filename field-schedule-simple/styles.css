@@ -452,7 +452,7 @@ select {
   position: absolute;
   left: 4px;
   right: 4px;
-  background: var(--bright-green);
+  background: #5A9E90;
   border-radius: var(--radius);
   padding: 4px 6px;
   color: var(--charcoal);
