@@ -34,20 +34,12 @@
     </button>
 
     <div id="filters" class="filters">
-      <div class="filter">
-        <span class="filter-label">Organization</span>
-        <div class="multi-select" id="filter-org"
-             data-filter-key="org"
-             data-placeholder="All organizations"
-             data-options='[]'></div>
-      </div>
-
       <label class="filter">
         <span class="filter-label">Show</span>
         <select id="filter-status">
           <option value="">All slots</option>
           <option value="booked">Booked only</option>
-          <option value="open">Open / Community Play only</option>
+          <option value="open">Available only</option>
         </select>
       </label>
     </div>
@@ -74,6 +66,11 @@
     <main id="field-grid" class="field-grid" aria-live="polite">
       <!-- Populated by field-calendar.js -->
     </main>
+
+    <!-- Legend -->
+    <div id="legend" class="legend" aria-label="Color legend">
+      <!-- Injected by JS based on orgs in current data -->
+    </div>
 
     <!-- Footer note -->
     <p class="schedule-footnote">

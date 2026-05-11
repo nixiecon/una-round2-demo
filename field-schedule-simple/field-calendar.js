@@ -32,7 +32,6 @@
     dateRange: document.getElementById('date-range'),
     grid: document.getElementById('field-grid'),
     legend: document.getElementById('legend'),
-    filterOrg: document.getElementById('filter-org'),
     filterStatus: document.getElementById('filter-status'),
     mobileFiltersToggle: document.getElementById('mobile-filters-toggle'),
     filtersPanel: document.getElementById('filters'),
@@ -49,7 +48,6 @@
     weekStart: getWeekStart(new Date()),
     mobileActiveDay: new Date().getDay(),
     filters: {
-      org: [],
       status: '',
     },
   };
@@ -57,8 +55,6 @@
   // ============ Bootstrap ============
 
   function init() {
-    populateOrgFilter();
-    initOrgMultiSelect();
     attachEventHandlers();
     render();
   }
@@ -76,9 +72,12 @@
     return getData().bookings || [];
   }
 
-  function getOrgColor(orgKey) {
-    const colors = getData().orgColors || {};
-    return colors[orgKey] || '#3B7267';
+  function getBookedColor() {
+    return getData().bookedColor || '#3B7267';
+  }
+
+  function getAvailableColor() {
+    return getData().availableColor || '#E0F5ED';
   }
 
   function getOperatingHours() {
@@ -87,91 +86,6 @@
 
   function getVsbConfig() {
     return getData().vsb || null;
-  }
-
-  // ============ Org filter ============
-
-  function populateOrgFilter() {
-    const bookings = getBookings();
-    const seen = new Map();
-    bookings.forEach(b => seen.set(b.orgKey, b.org));
-    const options = Array.from(seen.entries()).map(([key, label]) => ({ key, label }));
-    els.filterOrg.setAttribute('data-options',
-      JSON.stringify(options.map(o => o.label)));
-    // Keep a key↔label map for filter matching
-    state.orgKeyByLabel = {};
-    options.forEach(o => { state.orgKeyByLabel[o.label] = o.key; });
-  }
-
-  function initOrgMultiSelect() {
-    const root = els.filterOrg;
-    const placeholder = root.getAttribute('data-placeholder') || 'All';
-    const options = JSON.parse(root.getAttribute('data-options') || '[]');
-
-    function renderChips() {
-      root.innerHTML = '';
-      if (!state.filters.org.length) {
-        const ph = document.createElement('span');
-        ph.className = 'multi-select__placeholder';
-        ph.textContent = placeholder;
-        root.appendChild(ph);
-        return;
-      }
-      state.filters.org.forEach(label => {
-        const chip = document.createElement('span');
-        chip.className = 'multi-select__chip';
-        chip.innerHTML = label +
-          ' <button type="button" class="multi-select__chip-remove" aria-label="Remove">×</button>';
-        chip.querySelector('button').addEventListener('click', e => {
-          e.stopPropagation();
-          state.filters.org = state.filters.org.filter(l => l !== label);
-          renderChips();
-          render();
-        });
-        root.appendChild(chip);
-      });
-    }
-
-    let panel = null;
-    function openPanel() {
-      if (panel) return;
-      panel = document.createElement('div');
-      panel.className = 'multi-select__panel';
-      options.forEach(label => {
-        const opt = document.createElement('div');
-        opt.className = 'multi-select__option';
-        opt.setAttribute('aria-selected', state.filters.org.includes(label));
-        opt.innerHTML = `<input type="checkbox" ${state.filters.org.includes(label) ? 'checked' : ''} /> ${label}`;
-        opt.addEventListener('click', e => {
-          e.stopPropagation();
-          if (state.filters.org.includes(label)) {
-            state.filters.org = state.filters.org.filter(l => l !== label);
-          } else {
-            state.filters.org.push(label);
-          }
-          opt.setAttribute('aria-selected', state.filters.org.includes(label));
-          opt.querySelector('input').checked = state.filters.org.includes(label);
-          renderChips();
-          render();
-        });
-        panel.appendChild(opt);
-      });
-      root.appendChild(panel);
-    }
-
-    function closePanel() {
-      if (panel) { panel.remove(); panel = null; }
-    }
-
-    root.addEventListener('click', e => {
-      if (e.target.closest('.multi-select__chip')) return;
-      panel ? closePanel() : openPanel();
-    });
-    document.addEventListener('click', e => {
-      if (!root.contains(e.target)) closePanel();
-    });
-
-    renderChips();
   }
 
   // ============ Event handlers ============
@@ -210,7 +124,7 @@
     renderDateRange();
     renderMobileDayTabs();
     renderGrid();
-    if (els.legend) renderLegend();
+    renderLegend();
   }
 
   function renderDateRange() {
@@ -314,10 +228,11 @@
         dayCol.appendChild(block);
       });
 
-      // Community Play Time fills any gap inside operating hours
-      // that isn't a booking and isn't VSB.
-      const cptBlocks = computeCommunityPlayBlocks(date, bookings, vsbBlock, startMin);
-      cptBlocks.forEach(cpt => dayCol.appendChild(renderCpt(cpt)));
+      // Gap-fill: Community Play Time or Booking Available
+      // CPT applies during school-year weekday afternoons/evenings.
+      // "Booking Available" applies to other open gaps.
+      const gapBlocks = computeGapBlocks(date, bookings, vsbBlock, startMin);
+      gapBlocks.forEach(gap => dayCol.appendChild(renderGapBlock(gap)));
 
       grid.appendChild(dayCol);
     }
@@ -350,11 +265,12 @@
 
   function renderLegend() {
     els.legend.innerHTML = '';
-    const orgs = uniqueOrgs(getBookings());
+    const data = getData();
     const items = [
-      ...orgs.map(o => ({ label: o.label, color: getOrgColor(o.key) })),
-      { label: 'Vancouver School Board', color: '#69C0E5', dashed: true },
-      { label: 'Community Play Time', color: '#44BC9B', dashed: true },
+      { label: 'Booked', color: data.bookedColor || '#3B7267' },
+      { label: 'Vancouver School Board', color: data.vsbColor || '#69C0E5', dashed: true },
+      { label: 'Community Play Time', color: data.communityPlayColor || '#44BC9B', dashed: true },
+      { label: 'Booking Available', color: data.availableColor || '#E0F5ED', dashed: true },
     ];
     items.forEach(item => {
       const li = document.createElement('span');
@@ -371,10 +287,9 @@
   // ============ Filters ============
 
   function passesFilters(booking) {
-    const { org, status } = state.filters;
-    if (org.length && !org.includes(booking.org)) return false;
-    if (status === 'booked') return true; // bookings always count
-    if (status === 'open') return false;   // hide bookings
+    const { status } = state.filters;
+    if (status === 'booked') return true;
+    if (status === 'open') return false;   // hide bookings when showing available only
     return true;
   }
 
@@ -437,7 +352,7 @@
     return false;
   }
 
-  function computeCommunityPlayBlocks(date, bookings, vsbBlock, gridStartMin) {
+  function computeGapBlocks(date, bookings, vsbBlock, gridStartMin) {
     const op = getOperatingHours();
     const opStart = hhmmToMin(op.start);
     const opEnd = hhmmToMin(op.end);
@@ -469,15 +384,25 @@
     });
 
     // Find gaps
-    const gaps = [];
+    const rawGaps = [];
     let cursor = opStart;
     merged.forEach(seg => {
-      if (seg[0] > cursor) gaps.push([cursor, seg[0]]);
+      if (seg[0] > cursor) rawGaps.push([cursor, seg[0]]);
       cursor = Math.max(cursor, seg[1]);
     });
-    if (cursor < opEnd) gaps.push([cursor, opEnd]);
+    if (cursor < opEnd) rawGaps.push([cursor, opEnd]);
 
-    return gaps;
+    // Classify each gap:
+    // - If it's a school-year weekday and adjacent to VSB hours → "Community Play Time"
+    // - Otherwise → "Booking Available"
+    const cfg = getVsbConfig();
+    const isSchoolDay = cfg && cfg.days.includes(date.getDay()) && isInSchoolYear(date, cfg.schoolYear);
+
+    return rawGaps.map(([start, end]) => ({
+      startMin: start,
+      endMin: end,
+      type: isSchoolDay ? 'cpt' : 'available',
+    }));
   }
 
   // ============ Render helpers ============
@@ -492,7 +417,7 @@
     block.className = 'booking';
     block.style.top = `${top}px`;
     block.style.height = `${Math.max(height, 28)}px`;
-    block.style.background = getOrgColor(booking.orgKey);
+    block.style.background = getBookedColor();
 
     block.innerHTML = `
       <div class="booking__org">${booking.org}</div>
@@ -519,23 +444,25 @@
     return div;
   }
 
-  function renderCpt([startMin, endMin]) {
+  function renderGapBlock(gap) {
     const gridStart = getMinFromGridStart();
-    const top = (startMin - gridStart) * (HOUR_HEIGHT / 60);
-    const height = (endMin - startMin) * (HOUR_HEIGHT / 60);
-    if (height < 18) {
-      // too small to render meaningfully — skip
-      const div = document.createElement('div');
-      div.className = 'cpt-overlay';
-      div.style.top = `${top}px`;
-      div.style.height = `${height}px`;
-      return div;
-    }
+    const top = (gap.startMin - gridStart) * (HOUR_HEIGHT / 60);
+    const height = (gap.endMin - gap.startMin) * (HOUR_HEIGHT / 60);
+
     const div = document.createElement('div');
-    div.className = 'cpt-overlay';
     div.style.top = `${top}px`;
     div.style.height = `${height}px`;
-    div.textContent = height >= 40 ? 'Community Play Time' : 'CPT';
+
+    if (gap.type === 'cpt') {
+      div.className = 'cpt-overlay';
+      if (height >= 40) div.textContent = 'Community Play Time';
+      else if (height >= 18) div.textContent = 'CPT';
+    } else {
+      div.className = 'available-overlay';
+      if (height >= 40) div.textContent = 'Booking Available';
+      else if (height >= 18) div.textContent = 'Available';
+    }
+
     return div;
   }
 
@@ -605,11 +532,6 @@
   }
   function formatDateLong(d) {
     return `${DAY_NAMES_LONG[d.getDay()]}, ${MONTH_NAMES_SHORT[d.getMonth()]} ${d.getDate()}`;
-  }
-  function uniqueOrgs(bookings) {
-    const seen = new Map();
-    bookings.forEach(b => seen.set(b.orgKey, b.org));
-    return Array.from(seen.entries()).map(([key, label]) => ({ key, label }));
   }
 
   // ============ Go ============
