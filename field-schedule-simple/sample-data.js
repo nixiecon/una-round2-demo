@@ -53,13 +53,15 @@ window.UNA_FIELD_SAMPLE_DATA = {
     { id: "1501", org: "Vancouver United FC", orgKey: "vufc",
       startISO: "2026-04-30T18:00", endISO: "2026-04-30T21:30" },
 
-    // Fri May 1 — VUFC
+    // Fri May 1 — VUFC evening
     { id: "1601", org: "Vancouver United FC", orgKey: "vufc",
-      startISO: "2026-05-01T18:30", endISO: "2026-05-01T20:30" },
+      startISO: "2026-05-01T18:00", endISO: "2026-05-01T20:30" },
 
-    // Sat May 2 — VUFC all-day-ish
+    // Sat May 2 — VUFC morning + afternoon (gap in between for Booking Available)
     { id: "1701", org: "Vancouver United FC", orgKey: "vufc",
-      startISO: "2026-05-02T13:00", endISO: "2026-05-02T20:00" },
+      startISO: "2026-05-02T09:00", endISO: "2026-05-02T12:00" },
+    { id: "1702", org: "Vancouver United FC", orgKey: "vufc",
+      startISO: "2026-05-02T14:00", endISO: "2026-05-02T18:00" },
 
     // Sun May 3 — VUFC + Community Play + UBC Met
     { id: "1801", org: "Vancouver United FC", orgKey: "vufc",

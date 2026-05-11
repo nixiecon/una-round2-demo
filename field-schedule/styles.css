@@ -426,8 +426,8 @@ select {
   position: absolute;
   left: 4px;
   right: 4px;
-  background: rgba(105, 192, 229, 0.85);  /* light blue */
-  color: var(--charcoal);
+  background: rgba(60, 195, 215, 0.9);    /* bright cyan — matches live site VSB */
+  color: #FFFFFF;
   border-radius: var(--radius);
   padding: 4px 6px;
   font-size: 0.78rem;

@@ -53,13 +53,15 @@ window.UNA_FIELD_SAMPLE_DATA = {
     { id: "1501", org: "Vancouver United FC", orgKey: "vufc",
       startISO: "2026-04-30T18:00", endISO: "2026-04-30T21:30" },
 
-    // Fri May 1 — VUFC
+    // Fri May 1 — VUFC evening
     { id: "1601", org: "Vancouver United FC", orgKey: "vufc",
-      startISO: "2026-05-01T18:30", endISO: "2026-05-01T20:30" },
+      startISO: "2026-05-01T18:00", endISO: "2026-05-01T20:30" },
 
-    // Sat May 2 — VUFC all-day-ish
+    // Sat May 2 — VUFC morning + afternoon (gap in between for Booking Available)
     { id: "1701", org: "Vancouver United FC", orgKey: "vufc",
-      startISO: "2026-05-02T13:00", endISO: "2026-05-02T20:00" },
+      startISO: "2026-05-02T09:00", endISO: "2026-05-02T12:00" },
+    { id: "1702", org: "Vancouver United FC", orgKey: "vufc",
+      startISO: "2026-05-02T14:00", endISO: "2026-05-02T18:00" },
 
     // Sun May 3 — VUFC + Community Play + UBC Met
     { id: "1801", org: "Vancouver United FC", orgKey: "vufc",
@@ -68,18 +70,14 @@ window.UNA_FIELD_SAMPLE_DATA = {
       startISO: "2026-05-03T19:30", endISO: "2026-05-03T20:30" },
   ],
 
-  // Org → color key mapping.
-  // CSS variables --org-color-{key} live in styles.css.
-  // Glenda picks the final palette; these are placeholders.
+  // Org → color key mapping (matches live site palette).
   orgColors: {
-    "una":             "#3B7267",  // UNA green
-    "vsb":             "#69C0E5",  // VSB light blue
-    "vufc":            "#015990",  // navy
-    "ubcmet":          "#0A2B3F",  // deeper navy
-    "vlbe":            "#9C9C9C",  // grey
-    "soccermovement":  "#B3B3B3",  // light grey
-    "memorial":        "#1A1A1A",  // charcoal
-    "communityPlay":   "#44BC9B",  // bright green
+    "una":             "#2E8B7A",  // teal — UNA programs
+    "vufc":            "#00407A",  // bold navy — Vancouver United
+    "ubcmet":          "#0B1F3A",  // deep midnight navy — UBC Metropolitan
+    "vlbe":            "#8C8C8C",  // grey — VL-BE FC
+    "soccermovement":  "#48B8D0",  // bright cyan — Soccer Movement
+    "memorial":        "#1A1A1A",  // charcoal — tournaments
   },
 
   // Operating hours for the field (used for Community Play overlay)
