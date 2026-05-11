@@ -425,16 +425,22 @@
     if (cursor < opEnd) rawGaps.push([cursor, opEnd]);
 
     // Classify each gap:
-    // - If it's a school-year weekday and adjacent to VSB hours → "Community Play Time"
-    // - Otherwise → "Booking Available"
-    const cfg = getVsbConfig();
-    const isSchoolDay = cfg && cfg.days.includes(date.getDay()) && isInSchoolYear(date, cfg.schoolYear);
+    // - Before 6 PM → Community Play Time (field open for shared community use)
+    // - 6 PM onwards → Booking Available (evening slots orgs can reserve)
+    // - Gaps ≤ 30 min between evening bookings → just an empty spacer, no label
+    const EVENING = 18 * 60; // 6 PM in minutes
 
-    return rawGaps.map(([start, end]) => ({
-      startMin: start,
-      endMin: end,
-      type: isSchoolDay ? 'cpt' : 'available',
-    }));
+    return rawGaps.map(([start, end]) => {
+      const dur = end - start;
+      if (start >= EVENING && dur <= 30) {
+        return { startMin: start, endMin: end, type: 'spacer' };
+      }
+      return {
+        startMin: start,
+        endMin: end,
+        type: start < EVENING ? 'cpt' : 'available',
+      };
+    });
   }
 
   // ============ Render helpers ============
@@ -485,7 +491,10 @@
     div.style.top = `${top}px`;
     div.style.height = `${height}px`;
 
-    if (gap.type === 'cpt') {
+    if (gap.type === 'spacer') {
+      // Tiny gap between evening bookings — no label, no styling
+      return div;
+    } else if (gap.type === 'cpt') {
       div.className = 'cpt-overlay';
       if (height >= 40) div.textContent = 'Community Play Time';
       else if (height >= 18) div.textContent = 'CPT';

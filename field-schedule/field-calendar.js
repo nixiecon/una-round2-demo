@@ -352,8 +352,8 @@
 
       // Community Play Time fills any gap inside operating hours
       // that isn't a booking and isn't VSB.
-      const cptBlocks = computeCommunityPlayBlocks(date, bookings, vsbBlock, startMin);
-      cptBlocks.forEach(cpt => dayCol.appendChild(renderCpt(cpt)));
+      const gapBlocks = computeGapBlocks(date, bookings, vsbBlock, startMin);
+      gapBlocks.forEach(gap => dayCol.appendChild(renderGapBlock(gap)));
 
       grid.appendChild(dayCol);
     }
@@ -473,12 +473,11 @@
     return false;
   }
 
-  function computeCommunityPlayBlocks(date, bookings, vsbBlock, gridStartMin) {
+  function computeGapBlocks(date, bookings, vsbBlock, gridStartMin) {
     const op = getOperatingHours();
     const opStart = hhmmToMin(op.start);
     const opEnd = hhmmToMin(op.end);
 
-    // Build a list of "occupied" intervals inside operating hours
     const occupied = [];
     bookings.forEach(b => {
       occupied.push([
@@ -494,7 +493,6 @@
     }
     occupied.sort((a, b) => a[0] - b[0]);
 
-    // Merge overlapping
     const merged = [];
     occupied.forEach(seg => {
       if (!merged.length || seg[0] > merged[merged.length - 1][1]) {
@@ -504,16 +502,26 @@
       }
     });
 
-    // Find gaps
-    const gaps = [];
+    const rawGaps = [];
     let cursor = opStart;
     merged.forEach(seg => {
-      if (seg[0] > cursor) gaps.push([cursor, seg[0]]);
+      if (seg[0] > cursor) rawGaps.push([cursor, seg[0]]);
       cursor = Math.max(cursor, seg[1]);
     });
-    if (cursor < opEnd) gaps.push([cursor, opEnd]);
+    if (cursor < opEnd) rawGaps.push([cursor, opEnd]);
 
-    return gaps;
+    const EVENING = 18 * 60;
+    return rawGaps.map(([start, end]) => {
+      const dur = end - start;
+      if (start >= EVENING && dur <= 30) {
+        return { startMin: start, endMin: end, type: 'spacer' };
+      }
+      return {
+        startMin: start,
+        endMin: end,
+        type: start < EVENING ? 'cpt' : 'available',
+      };
+    });
   }
 
   // ============ Render helpers ============
@@ -555,23 +563,27 @@
     return div;
   }
 
-  function renderCpt([startMin, endMin]) {
+  function renderGapBlock(gap) {
     const gridStart = getMinFromGridStart();
-    const top = (startMin - gridStart) * (HOUR_HEIGHT / 60);
-    const height = (endMin - startMin) * (HOUR_HEIGHT / 60);
-    if (height < 18) {
-      // too small to render meaningfully — skip
-      const div = document.createElement('div');
-      div.className = 'cpt-overlay';
-      div.style.top = `${top}px`;
-      div.style.height = `${height}px`;
-      return div;
-    }
+    const top = (gap.startMin - gridStart) * (HOUR_HEIGHT / 60);
+    const height = (gap.endMin - gap.startMin) * (HOUR_HEIGHT / 60);
+
     const div = document.createElement('div');
-    div.className = 'cpt-overlay';
     div.style.top = `${top}px`;
     div.style.height = `${height}px`;
-    div.textContent = height >= 40 ? 'Community Play Time' : 'CPT';
+
+    if (gap.type === 'spacer') {
+      return div;
+    } else if (gap.type === 'cpt') {
+      div.className = 'cpt-overlay';
+      if (height >= 40) div.textContent = 'Community Play Time';
+      else if (height >= 18) div.textContent = 'CPT';
+    } else {
+      div.className = 'cpt-overlay'; // same style, different label
+      if (height >= 40) div.textContent = 'Booking Available';
+      else if (height >= 18) div.textContent = 'Available';
+    }
+
     return div;
   }
 
