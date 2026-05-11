@@ -14,19 +14,19 @@ window.UNA_FIELD_SAMPLE_DATA = {
     { id: "1101", org: "Vancouver United FC", orgKey: "vufc",
       startISO: "2026-05-11T18:00", endISO: "2026-05-11T19:30" },
     { id: "1102", org: "VL-BE FC", orgKey: "vlbe",
-      startISO: "2026-05-11T20:00", endISO: "2026-05-11T21:30" },
+      startISO: "2026-05-11T19:30", endISO: "2026-05-11T21:30" },
 
     // Tue May 12 (VSB 9–6 auto)
     { id: "1201", org: "UNA Flag Football", orgKey: "una",
       startISO: "2026-05-12T18:00", endISO: "2026-05-12T19:30" },
     { id: "1202", org: "Vancouver United FC", orgKey: "vufc",
-      startISO: "2026-05-12T20:00", endISO: "2026-05-12T21:30" },
+      startISO: "2026-05-12T19:30", endISO: "2026-05-12T21:30" },
 
     // Wed May 13 (VSB 9–6 auto)
     { id: "1301", org: "Soccer Movement FC", orgKey: "soccermovement",
       startISO: "2026-05-13T18:00", endISO: "2026-05-13T19:00" },
     { id: "1302", org: "UNA Training", orgKey: "una",
-      startISO: "2026-05-13T19:30", endISO: "2026-05-13T21:00" },
+      startISO: "2026-05-13T19:00", endISO: "2026-05-13T21:00" },
 
     // Thu May 14 (VSB 9–6 auto) — VUFC fills entire evening to close
     { id: "1401", org: "Vancouver United FC", orgKey: "vufc",
