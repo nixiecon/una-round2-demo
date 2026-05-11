@@ -247,14 +247,16 @@
         dayCol.appendChild(row);
       }
 
-      // VSB overlay (z-index 1)
+      const showAvailableOnly = state.filters.status === 'open';
+
+      // VSB overlay (z-index 1) — hidden in Available-only mode
       const vsbBlock = computeVsbBlockForDate(date, startMin);
-      if (vsbBlock) {
+      if (vsbBlock && !showAvailableOnly) {
         const overlay = renderVsbOverlay(vsbBlock);
         dayCol.appendChild(overlay);
       }
 
-      // Bookings (z-index 2+)
+      // Bookings (z-index 2+) — hidden in Available-only mode
       const bookings = bookingsForDate(date).filter(passesFilters);
       bookings.forEach((b, i) => {
         const block = renderBooking(b, startMin);
@@ -262,10 +264,11 @@
         dayCol.appendChild(block);
       });
 
-      // Gap-fill: Community Play Time or Booking Available
-      // CPT applies during school-year weekday afternoons/evenings.
-      // "Booking Available" applies to other open gaps.
-      const gapBlocks = computeGapBlocks(date, bookings, vsbBlock, startMin);
+      // Gap-fill: pass null for VSB+bookings in Available-only mode
+      // so the entire day shows as available
+      const gapVsb = showAvailableOnly ? null : vsbBlock;
+      const gapBookings = showAvailableOnly ? [] : bookings;
+      const gapBlocks = computeGapBlocks(date, gapBookings, gapVsb, startMin);
       gapBlocks.forEach(gap => dayCol.appendChild(renderGapBlock(gap)));
 
       grid.appendChild(dayCol);

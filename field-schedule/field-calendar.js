@@ -246,9 +246,11 @@
         dayCol.appendChild(row);
       }
 
+      const showAvailableOnly = state.filters.status === 'open';
+
       // VSB overlay (z-index 1)
       const vsbBlock = computeVsbBlockForDate(date, startMin);
-      if (vsbBlock) {
+      if (vsbBlock && !showAvailableOnly) {
         const overlay = renderVsbOverlay(vsbBlock);
         dayCol.appendChild(overlay);
       }
@@ -261,9 +263,10 @@
         dayCol.appendChild(block);
       });
 
-      // Community Play Time fills any gap inside operating hours
-      // that isn't a booking and isn't VSB.
-      const gapBlocks = computeGapBlocks(date, bookings, vsbBlock, startMin);
+      // Gap-fill — in Available-only mode, treat entire day as open
+      const gapVsb = showAvailableOnly ? null : vsbBlock;
+      const gapBookings = showAvailableOnly ? [] : bookings;
+      const gapBlocks = computeGapBlocks(date, gapBookings, gapVsb, startMin);
       gapBlocks.forEach(gap => dayCol.appendChild(renderGapBlock(gap)));
 
       grid.appendChild(dayCol);
