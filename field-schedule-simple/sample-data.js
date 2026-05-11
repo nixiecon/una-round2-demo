@@ -55,7 +55,7 @@ window.UNA_FIELD_SAMPLE_DATA = {
   // Simplified color scheme — availability-focused.
   // All booked slots use one "booked" color regardless of org.
   bookedColor:        "#3B7267",   // UNA green — all bookings
-  vsbColor:           "#DDD5C5",   // warm sand — VSB (fades into background)
+  vsbColor:           "#B2E8D4",   // light green — same family as CPT
   communityPlayColor: "#44BC9B",   // bright green — Community Play Time
   availableColor:     "#F5E06B",   // golden yellow — Booking Available (pops)
 

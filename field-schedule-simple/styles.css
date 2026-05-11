@@ -426,15 +426,15 @@ select {
   position: absolute;
   left: 4px;
   right: 4px;
-  background: #DDD5C5;                    /* warm sand — fades into background */
-  color: #8A7D6B;
+  background: rgba(68, 188, 155, 0.25);   /* light green — same family as CPT */
+  color: var(--bright-green-darker);
   border-radius: var(--radius);
   padding: 4px 6px;
   font-size: 0.78rem;
   font-weight: 600;
   pointer-events: none;
   z-index: 1;
-  border: 1px solid #C9BFA8;
+  border: 1px solid rgba(65, 162, 136, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
