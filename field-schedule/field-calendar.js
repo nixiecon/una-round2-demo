@@ -510,18 +510,27 @@
     });
     if (cursor < opEnd) rawGaps.push([cursor, opEnd]);
 
-    const EVENING = 17 * 60 + 30; // 5:30 PM — earliest evening booking
-    return rawGaps.map(([start, end]) => {
+    const EVENING = 18 * 60; // 6 PM
+
+    const result = [];
+    rawGaps.forEach(([start, end]) => {
       const dur = end - start;
-      if (dur <= 30 && start >= EVENING) {
-        return { startMin: start, endMin: end, type: 'spacer' };
+      if (dur <= 30 && start >= EVENING - 30) {
+        result.push({ startMin: start, endMin: end, type: 'spacer' });
+        return;
       }
-      return {
-        startMin: start,
-        endMin: end,
-        type: start < EVENING ? 'cpt' : 'available',
-      };
+      if (start < EVENING && end > EVENING) {
+        result.push({ startMin: start, endMin: EVENING, type: 'cpt' });
+        result.push({ startMin: EVENING, endMin: end, type: 'available' });
+      } else {
+        result.push({
+          startMin: start,
+          endMin: end,
+          type: start < EVENING ? 'cpt' : 'available',
+        });
+      }
     });
+    return result;
   }
 
   // ============ Render helpers ============
