@@ -263,11 +263,13 @@
         dayCol.appendChild(block);
       });
 
-      // Gap-fill — in Available-only mode, treat entire day as open
-      const gapVsb = showAvailableOnly ? null : vsbBlock;
-      const gapBookings = showAvailableOnly ? [] : bookings;
-      const gapBlocks = computeGapBlocks(date, gapBookings, gapVsb, startMin);
-      gapBlocks.forEach(gap => dayCol.appendChild(renderGapBlock(gap)));
+      // Gap-fill — always compute with real data so gaps are accurate
+      const allBookings = bookingsForDate(date);
+      const gapBlocks = computeGapBlocks(date, allBookings, vsbBlock, startMin);
+      gapBlocks.forEach(gap => {
+        if (showAvailableOnly && gap.type !== 'available') return;
+        dayCol.appendChild(renderGapBlock(gap));
+      });
 
       grid.appendChild(dayCol);
     }

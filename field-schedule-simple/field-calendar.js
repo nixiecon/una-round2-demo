@@ -249,14 +249,14 @@
 
       const showAvailableOnly = state.filters.status === 'open';
 
-      // VSB overlay (z-index 1) — hidden in Available-only mode
+      // VSB overlay (z-index 1)
       const vsbBlock = computeVsbBlockForDate(date, startMin);
       if (vsbBlock && !showAvailableOnly) {
         const overlay = renderVsbOverlay(vsbBlock);
         dayCol.appendChild(overlay);
       }
 
-      // Bookings (z-index 2+) — hidden in Available-only mode
+      // Bookings (z-index 2+)
       const bookings = bookingsForDate(date).filter(passesFilters);
       bookings.forEach((b, i) => {
         const block = renderBooking(b, startMin);
@@ -264,12 +264,14 @@
         dayCol.appendChild(block);
       });
 
-      // Gap-fill: pass null for VSB+bookings in Available-only mode
-      // so the entire day shows as available
-      const gapVsb = showAvailableOnly ? null : vsbBlock;
-      const gapBookings = showAvailableOnly ? [] : bookings;
-      const gapBlocks = computeGapBlocks(date, gapBookings, gapVsb, startMin);
-      gapBlocks.forEach(gap => dayCol.appendChild(renderGapBlock(gap)));
+      // Gap-fill — always compute with real data so gaps are accurate
+      const allBookings = bookingsForDate(date);
+      const gapBlocks = computeGapBlocks(date, allBookings, vsbBlock, startMin);
+      gapBlocks.forEach(gap => {
+        // In Available-only mode, only show 'available' type gaps
+        if (showAvailableOnly && gap.type !== 'available') return;
+        dayCol.appendChild(renderGapBlock(gap));
+      });
 
       grid.appendChild(dayCol);
     }
