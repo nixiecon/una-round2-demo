@@ -488,7 +488,7 @@
     div.className = 'vsb-overlay';
     div.style.top = `${top}px`;
     div.style.height = `${height}px`;
-    div.innerHTML = 'Vancouver School Board<br><span style="font-weight:500;font-size:0.7rem;opacity:0.85">' + timeStr + '</span>';
+    div.innerHTML = '<div class="booking__org">Vancouver School Board</div><div class="booking__time">' + timeStr + '</div>';
     return div;
   }
 
