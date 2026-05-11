@@ -69,7 +69,39 @@
   }
 
   function getBookings() {
-    return getData().bookings || [];
+    const data = getData();
+    const bookings = data.bookings || [];
+    if (!window.UNA_FIELD_LIVE_DATA) {
+      return offsetBookingsToWeek(bookings, state.weekStart);
+    }
+    return bookings;
+  }
+
+  let _anchorWeekStart = null;
+  function offsetBookingsToWeek(bookings, targetWeekStart) {
+    if (!bookings.length) return bookings;
+    if (!_anchorWeekStart) {
+      const earliest = bookings.reduce((a, b) => a.startISO < b.startISO ? a : b);
+      _anchorWeekStart = getWeekStart(new Date(earliest.startISO));
+    }
+    const diffMs = targetWeekStart.getTime() - _anchorWeekStart.getTime();
+    if (diffMs === 0) return bookings;
+    const diffDays = Math.round(diffMs / 86400000);
+    return bookings.map(b => ({
+      ...b,
+      startISO: shiftISO(b.startISO, diffDays),
+      endISO:   shiftISO(b.endISO, diffDays),
+    }));
+  }
+
+  function shiftISO(iso, days) {
+    const d = new Date(iso);
+    d.setDate(d.getDate() + days);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const time = iso.split('T')[1];
+    return `${y}-${m}-${dd}T${time}`;
   }
 
   function getBookedColor() {
