@@ -55,9 +55,9 @@ window.UNA_FIELD_SAMPLE_DATA = {
   // Simplified color scheme — availability-focused.
   // All booked slots use one "booked" color regardless of org.
   bookedColor:        "#3B7267",   // UNA green — all bookings
-  vsbColor:           "#69C0E5",   // light blue — VSB school-day block
+  vsbColor:           "#DDD5C5",   // warm sand — VSB (fades into background)
   communityPlayColor: "#44BC9B",   // bright green — Community Play Time
-  availableColor:     "#E0F5ED",   // pale green — Booking Available slots
+  availableColor:     "#F5E06B",   // golden yellow — Booking Available (pops)
 
   // Operating hours for the field
   operatingHours: { start: "09:00", end: "22:00" },

@@ -426,15 +426,15 @@ select {
   position: absolute;
   left: 4px;
   right: 4px;
-  background: rgba(105, 192, 229, 0.85);  /* light blue */
-  color: var(--charcoal);
+  background: #DDD5C5;                    /* warm sand — fades into background */
+  color: #8A7D6B;
   border-radius: var(--radius);
   padding: 4px 6px;
   font-size: 0.78rem;
   font-weight: 600;
   pointer-events: none;
   z-index: 1;
-  border: 1px dashed var(--una-green-darker);
+  border: 1px solid #C9BFA8;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -468,10 +468,10 @@ select {
   position: absolute;
   left: 4px;
   right: 4px;
-  background: #E0F5ED;
-  border: 1px dashed var(--bright-green-darker);
+  background: #F5E06B;
+  border: 1px dashed #C4A600;
   border-radius: var(--radius);
-  color: var(--bright-green-darker);
+  color: #7A6E00;
   padding: 4px 6px;
   font-size: 0.72rem;
   font-weight: 600;
