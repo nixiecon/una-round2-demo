@@ -1,18 +1,44 @@
 /* ========================================================================
  * PerfectMind → UNA Field Schedule Adapter
- * Forks the pattern from
- * Projects/UNA Drop-In Calendar/perfectmind-adapter.js
- * but is mapped to the field-booking schema (org rentals, not classes).
+ * Forks the pattern from the Drop-In Calendar, which UNA's dev (Kimbo
+ * Agency) shipped to production as a custom PHP page template that injects
+ * the PerfectMind feed into the page as a global JS array, then renders it
+ * client-side. Confirmed by inspecting the live test site on 2026-06-02
+ * (https://myunatest.kimboagency.com/drop-in): global var `window.UNA_LIVE_DATA`,
+ * no runtime fetch, PerfectMind used only for outbound "Register" links.
+ *
+ * This adapter consumes that SAME feed shape for the field schedule, so it's
+ * a clean drop-in for the PHP layer: the template assigns the field feed to
+ * `window.UNA_FIELD_LIVE_DATA` (parallel to the drop-in's `UNA_LIVE_DATA`,
+ * or PHP can point both at one feed) and field-calendar.js renders it.
  *
  * Usage:
- *   const fieldData = window.PerfectMindFieldAdapter.transform(rawEvents);
- *   // returns { bookings: [...], orgColors: {...}, operatingHours, vsb }
+ *   const fieldData = window.PerfectMindFieldAdapter.transform(window.UNA_FIELD_LIVE_DATA);
+ *   // → { bookings: [...], orgColors: {...}, operatingHours, vsb }
  *
- * Input shape (PerfectMind PHP array, same shape as drop-in feed):
- *   { Subject, CourseID, ExactTime, EndTime, LocationName, ... }
+ * CONFIRMED PerfectMind feed fields (per-session object, live 2026-06-02):
+ *   Subject, CourseID, ExactTime, EndTime, Description, LocationName,
+ *   InstructorName, Capacity, Remaining, ID, CalendarName, MinimumAge,
+ *   MaximumAge, CalendarCategory, SportDropIn, FamilySportsDropIn,
+ *   RegisteredSports, ProgramswithDropInOptions, SocialProgramDropIn,
+ *   ProgramDate
  *
- * Output shape (field-calendar.js schema):
- *   { id, org, orgKey, startISO, endISO, notes }
+ * Field → output mapping:
+ *   Subject       → org        (display name / renting org — see TODO below)
+ *   CourseID, ID  → id
+ *   ExactTime     → startISO   (full start datetime; ProgramDate is fallback)
+ *   EndTime       → endISO     (full datetime OR time-only — handled below)
+ *   Description   → notes
+ *   LocationName  → location   (passthrough)
+ *   CalendarName  → field      (passthrough — which field/facility)
+ *   CalendarCategory → category(passthrough)
+ *   Capacity      → capacity   (passthrough)
+ *   Remaining     → remaining  (passthrough)
+ *
+ * TODO(Glenda/Tim): The confirmed shape above is from the drop-in *program*
+ * feed. Field RENTALS may populate the renting org in `Subject` (most likely)
+ * or in a different field. Confirm which field carries the org/team name for
+ * field bookings, then adjust the `org` source + ORG_KEY_LOOKUP keys.
  * ====================================================================== */
 
 (function () {
@@ -63,7 +89,8 @@
 
   // ----- Time parsing -----
 
-  // ExactTime: "2026-04-07 09:25AM" or "2026-04-07 09:25 AM"
+  // ExactTime: "2026-04-07 09:25AM" / "2026-04-07 09:25 AM".
+  // Also accepts a bare ProgramDate ("2026-04-07") as a date-only fallback.
   function parseExactTime(exactTime) {
     if (!exactTime) return null;
     var d = new Date(exactTime);
@@ -79,9 +106,16 @@
     return new Date(y, m, dd, h, mn);
   }
 
-  // EndTime: "1:00PM" — combined with the start date
+  // EndTime in the real feed may be a full datetime ("2026-04-07 01:00PM")
+  // OR time-only ("1:00PM"). Try a full parse first, then fall back to
+  // time-only combined with the start date.
   function parseEndTime(endTimeStr, startDate) {
-    if (!endTimeStr || !startDate) return null;
+    if (!endTimeStr) return null;
+    if (/\d{4}-\d{2}-\d{2}/.test(endTimeStr)) {
+      var full = parseExactTime(endTimeStr);
+      if (full) return full;
+    }
+    if (!startDate) return null;
     var match = endTimeStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
     if (!match) return null;
     var h = +match[1], mn = +match[2], ap = match[3].toUpperCase();
@@ -110,19 +144,29 @@
     }
 
     const bookings = rawEvents.map(function (raw) {
-      const startDate = parseExactTime(raw.ExactTime);
+      // ExactTime is the full start datetime; ProgramDate is a date-only fallback.
+      const startDate = parseExactTime(raw.ExactTime) || parseExactTime(raw.ProgramDate);
       if (!startDate) return null;
       const endDate = parseEndTime(raw.EndTime, startDate);
       if (!endDate) return null;
+
+      // TODO(Glenda/Tim): confirm the renting-org field for field rentals.
+      // Subject is the program/booking title in the drop-in feed.
       const org = String(raw.Subject || '').trim();
 
       return {
-        id:       String(raw.CourseID || raw.ID || ''),
-        org:      org,
-        orgKey:   deriveOrgKey(org),
-        startISO: toLocalISO(startDate),
-        endISO:   toLocalISO(endDate),
-        notes:    String(raw.Notes || raw.Description || '').trim() || undefined,
+        id:        String(raw.CourseID || raw.ID || ''),
+        org:       org,
+        orgKey:    deriveOrgKey(org),
+        startISO:  toLocalISO(startDate),
+        endISO:    toLocalISO(endDate),
+        notes:     String(raw.Description || '').trim() || undefined,
+        // Passthroughs from the real feed (renderer may surface these later).
+        location:  String(raw.LocationName || '').trim() || undefined,
+        field:     String(raw.CalendarName || '').trim() || undefined,
+        category:  String(raw.CalendarCategory || '').trim() || undefined,
+        capacity:  (raw.Capacity != null) ? Number(raw.Capacity) : undefined,
+        remaining: (raw.Remaining != null) ? Number(raw.Remaining) : undefined,
       };
     }).filter(function (b) { return b !== null; });
 
