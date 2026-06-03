@@ -1,5 +1,6 @@
 /* Sample data — from UNA Field Schedule Excel for May 10–17, 2026.
- * Each booking is colored by org (teal shades; live data auto-generates them).
+ * Bookings are coloured by bucket: UNA programs (UNA green), external orgs
+ * (bright green), and open gaps (yellow). The renderer decides the bucket.
  * The renderer offsets these to the currently displayed week.
  * VSB and Community Play Time are rendered as logic overlays by field-calendar.js.
  */
@@ -48,18 +49,10 @@ window.UNA_FIELD_SAMPLE_DATA = {
       startISO: "2026-05-17T19:30", endISO: "2026-05-17T21:00" },
   ],
 
-  // Per-org teal shades — same family, different values
-  orgShades: {
-    "vufc":            "#2D5F56",
-    "ubcmet":          "#1A4A42",
-    "vlbe":            "#4A8A7E",
-    "una":             "#3B7267",
-    "soccermovement":  "#5A9E90",
-  },
-  bookedColor:        "#3B7267",
-  vsbColor:           "#B2E8D4",
-  communityPlayColor: "#44BC9B",
-  availableColor:     "#F5E06B",
+  // Three-bucket UNA brand colours (Glenda 2026-06-03)
+  internalColor:  "#3B7267",   // UNA Green — UNA programs
+  externalColor:  "#44BC9B",   // Bright Green Accent — external orgs (VSB, clubs)
+  availableColor: "#E9E980",   // Bright Yellow Accent — "Open to Book"
 
   operatingHours: { start: "09:00", end: "22:00" },
 

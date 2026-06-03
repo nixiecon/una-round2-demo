@@ -471,12 +471,12 @@ select {
   z-index: 0;
 }
 
-/* Booking Available — bright yellow block */
+/* Open to Book — bright yellow block */
 .available-overlay {
   position: absolute;
   left: 4px;
   right: 4px;
-  background: var(--bright-yellow-lighter);
+  background: var(--bright-yellow);
   border-radius: var(--radius);
   padding: 4px 6px;
   color: #5C5200;
@@ -493,6 +493,26 @@ select {
   gap: 2px;
   border: 1px solid var(--bright-yellow-darker);
   z-index: 0;
+}
+/* "Open to Book" is clickable — opens a pre-filled booking email */
+.available-overlay.is-clickable {
+  cursor: pointer;
+  transition: transform 0.05s ease, box-shadow 0.05s ease;
+}
+.available-overlay.is-clickable:hover,
+.available-overlay.is-clickable:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+  outline: 2px solid var(--bright-yellow-darker);
+  outline-offset: 1px;
+  z-index: 6;
+}
+.available-cta {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  opacity: 0.8;
+  white-space: nowrap;
 }
 
 /* ============ Legend ============ */

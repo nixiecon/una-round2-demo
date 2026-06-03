@@ -24,6 +24,15 @@
                              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const HOUR_HEIGHT = 56;     // matches --hour-height-desktop in styles.css
 
+  // Clicking an "Open to Book" slot opens the visitor's email client with a
+  // pre-filled booking request (recipient, subject, and a body that names the
+  // exact day + time they clicked). Configure the inbox + subject here. The page
+  // can override the recipient at runtime via window.UNA_FIELD_BOOKING_EMAIL.
+  const BOOKING_CONFIG = {
+    email:   'communications@myuna.ca',   // TODO(confirm with Glenda): the field-booking inbox
+    subject: 'Community Field Booking Inquiry',
+  };
+
   const STORAGE_KEY = 'una-field-schedule-prefs';
   const MOBILE_QUERY = window.matchMedia('(max-width: 767px)');
 
@@ -65,7 +74,7 @@
     if (window.UNA_FIELD_LIVE_DATA && window.PerfectMindFieldAdapter) {
       return window.PerfectMindFieldAdapter.transform(window.UNA_FIELD_LIVE_DATA);
     }
-    return window.UNA_FIELD_SAMPLE_DATA || { bookings: [], orgColors: {} };
+    return window.UNA_FIELD_SAMPLE_DATA || { bookings: [] };
   }
 
   function getBookings() {
@@ -104,14 +113,28 @@
     return `${y}-${m}-${dd}T${time}`;
   }
 
-  function getBookedColor(orgKey) {
-    const shades = getData().orgShades;
-    if (shades && orgKey && shades[orgKey]) return shades[orgKey];
-    return getData().bookedColor || '#3B7267';
+  // Three-bucket colour model (per Glenda 2026-06-03):
+  //   internal  → UNA programs (Community Play Time, Training, etc.) → UNA green
+  //   external  → everyone else (VSB, clubs)                        → secondary green
+  //   available → "Open to Book" gaps                               → yellow
+  // An org is "internal" when its name starts with UNA. One rule, no per-org list.
+  function bucketForOrg(org) {
+    return /^una\b/i.test(String(org || '').trim()) ? 'internal' : 'external';
+  }
+  function getInternalColor() { return getData().internalColor || '#3B7267'; }
+  function getExternalColor() { return getData().externalColor || '#44BC9B'; }
+  function getBookedColor(booking) {
+    return bucketForOrg(booking.org) === 'internal'
+      ? getInternalColor()
+      : getExternalColor();
+  }
+  // UNA green is dark (white text); bright green is light (charcoal text).
+  function getBookedTextColor(booking) {
+    return bucketForOrg(booking.org) === 'internal' ? '#FFFFFF' : '#1A1A1A';
   }
 
   function getAvailableColor() {
-    return getData().availableColor || '#E0F5ED';
+    return getData().availableColor || '#E9E980';
   }
 
   function getOperatingHours() {
@@ -270,7 +293,7 @@
       gapBlocks.forEach(gap => {
         // In Available-only mode, only show 'available' type gaps
         if (showAvailableOnly && gap.type !== 'available') return;
-        dayCol.appendChild(renderGapBlock(gap));
+        dayCol.appendChild(renderGapBlock(gap, date));
       });
 
       grid.appendChild(dayCol);
@@ -306,10 +329,9 @@
     els.legend.innerHTML = '';
     const data = getData();
     const items = [
-      { label: 'Booked', color: data.bookedColor || '#3B7267' },
-      { label: 'Vancouver School Board', color: data.vsbColor || '#69C0E5', dashed: true },
-      { label: 'Community Play Time', color: data.communityPlayColor || '#44BC9B', dashed: true },
-      { label: 'Booking Available', color: data.availableColor || '#E0F5ED', dashed: true },
+      { label: 'UNA (Community Play & Training)', color: data.internalColor || '#3B7267' },
+      { label: 'External Bookings (VSB, clubs)', color: data.externalColor || '#44BC9B' },
+      { label: 'Open to Book', color: data.availableColor || '#E9E980' },
     ];
     items.forEach(item => {
       const li = document.createElement('span');
@@ -471,7 +493,8 @@
     block.className = 'booking';
     block.style.top = `${top}px`;
     block.style.height = `${Math.max(height, 28)}px`;
-    block.style.background = getBookedColor(booking.orgKey);
+    block.style.background = getBookedColor(booking);
+    block.style.color = getBookedTextColor(booking);
 
     block.innerHTML = `
       <div class="booking__org">${booking.org}</div>
@@ -495,11 +518,13 @@
     div.className = 'vsb-overlay';
     div.style.top = `${top}px`;
     div.style.height = `${height}px`;
+    div.style.background = getExternalColor();   // VSB is an external booking
+    div.style.color = '#1A1A1A';                 // charcoal text on bright green
     div.innerHTML = '<div class="booking__org">Vancouver School Board</div><div class="booking__time">' + timeStr + '</div>';
     return div;
   }
 
-  function renderGapBlock(gap) {
+  function renderGapBlock(gap, date) {
     const gridStart = getMinFromGridStart();
     const top = (gap.startMin - gridStart) * (HOUR_HEIGHT / 60);
     const height = (gap.endMin - gap.startMin) * (HOUR_HEIGHT / 60);
@@ -515,16 +540,64 @@
     const timeStr = formatMinToTime(gap.startMin) + ' – ' + formatMinToTime(gap.endMin);
 
     if (gap.type === 'cpt') {
+      // Community Play Time is a UNA program → internal (UNA green).
       div.className = 'cpt-block';
-      div.innerHTML = '<div class="booking__org">Community Play Time</div>' +
+      div.style.background = getInternalColor();
+      div.style.color = '#fff';
+      div.innerHTML = '<div class="booking__org">UNA Community Play Time</div>' +
         '<div class="booking__time">' + timeStr + '</div>';
     } else {
-      div.className = 'available-overlay';
-      div.innerHTML = '<div class="booking__org">Booking Available</div>' +
-        '<div class="booking__time">' + timeStr + '</div>';
+      // "Open to Book" gap → yellow, and clickable to start a booking email.
+      div.className = 'available-overlay is-clickable';
+      div.innerHTML = '<div class="booking__org">Open to Book</div>' +
+        '<div class="booking__time">' + timeStr + '</div>' +
+        '<div class="available-cta">✉ Click to request</div>';
+      makeSlotBookable(div, date, gap, timeStr);
     }
 
     return div;
+  }
+
+  // ============ Booking-request email ============
+
+  // Wire an "Open to Book" slot so clicking (or Enter/Space) opens the visitor's
+  // email client with a booking request pre-filled for that exact day + time.
+  function makeSlotBookable(div, date, gap, timeStr) {
+    const dateStr = formatDateFull(date);
+    div.setAttribute('role', 'button');
+    div.setAttribute('tabindex', '0');
+    div.setAttribute('title', 'Click to email a booking request for this slot');
+    div.setAttribute('aria-label',
+      'Request to book the Community Field on ' + dateStr + ', ' + timeStr + ', by email');
+    div.addEventListener('click', function () { openBookingEmail(date, gap); });
+    div.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openBookingEmail(date, gap);
+      }
+    });
+  }
+
+  function bookingRecipient() {
+    return window.UNA_FIELD_BOOKING_EMAIL || BOOKING_CONFIG.email;
+  }
+
+  function buildBookingMailto(date, gap) {
+    const dateStr = formatDateFull(date);
+    const timeStr = formatMinToTime(gap.startMin) + ' to ' + formatMinToTime(gap.endMin);
+    const body =
+      'Hello,\n\n' +
+      'I would like to book the Community Field on ' + dateStr +
+      ' from ' + timeStr + '.\n\n' +
+      'Please let me know if this slot is available.\n\n' +
+      'Thank you,\n';
+    return 'mailto:' + bookingRecipient() +
+      '?subject=' + encodeURIComponent(BOOKING_CONFIG.subject) +
+      '&body=' + encodeURIComponent(body);
+  }
+
+  function openBookingEmail(date, gap) {
+    window.location.href = buildBookingMailto(date, gap);
   }
 
   function formatMinToTime(min) {
@@ -602,6 +675,9 @@
   }
   function formatDateLong(d) {
     return `${DAY_NAMES_LONG[d.getDay()]}, ${MONTH_NAMES_SHORT[d.getMonth()]} ${d.getDate()}`;
+  }
+  function formatDateFull(d) {
+    return `${DAY_NAMES_LONG[d.getDay()]}, ${MONTH_NAMES_SHORT[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
   }
 
   // ============ Go ============
