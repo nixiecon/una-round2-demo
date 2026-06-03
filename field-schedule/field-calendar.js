@@ -42,6 +42,7 @@
     grid: document.getElementById('field-grid'),
     legend: document.getElementById('legend'),
     filterStatus: document.getElementById('filter-status'),
+    filterOpenOnly: document.getElementById('filter-open-only'),
     mobileFiltersToggle: document.getElementById('mobile-filters-toggle'),
     filtersPanel: document.getElementById('filters'),
     prevWeek: document.getElementById('prev-week'),
@@ -161,10 +162,20 @@
       state.mobileActiveDay = new Date().getDay();
       render();
     });
-    els.filterStatus.addEventListener('change', e => {
-      state.filters.status = e.target.value;
-      render();
-    });
+    // Demo page uses a single "Show Open to Book Only" checkbox; the live
+    // template uses a richer status dropdown. Wire up whichever exists.
+    if (els.filterOpenOnly) {
+      els.filterOpenOnly.addEventListener('change', e => {
+        state.filters.status = e.target.checked ? 'open' : '';
+        render();
+      });
+    }
+    if (els.filterStatus) {
+      els.filterStatus.addEventListener('change', e => {
+        state.filters.status = e.target.value;
+        render();
+      });
+    }
     els.mobileFiltersToggle.addEventListener('click', () => {
       const open = els.filtersPanel.classList.toggle('is-open');
       els.mobileFiltersToggle.setAttribute('aria-expanded', String(open));
@@ -550,8 +561,7 @@
       // "Open to Book" gap → yellow, and clickable to start a booking email.
       div.className = 'available-overlay is-clickable';
       div.innerHTML = '<div class="booking__org">Open to Book</div>' +
-        '<div class="booking__time">' + timeStr + '</div>' +
-        '<div class="available-cta">✉ Click to request</div>';
+        '<div class="booking__time">' + timeStr + '</div>';
       makeSlotBookable(div, date, gap, timeStr);
     }
 

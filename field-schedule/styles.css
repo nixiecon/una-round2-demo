@@ -157,6 +157,27 @@ select {
   color: var(--una-green);
 }
 
+/* Compact checkbox filter — sits left, doesn't stretch like the dropdowns */
+.filter--checkbox {
+  flex: 0 0 auto;
+  min-width: 0;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.filter--checkbox input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--una-green);
+  cursor: pointer;
+}
+.filter--checkbox span {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
 .filter select,
 .multi-select {
   padding: 8px 12px;
@@ -479,10 +500,10 @@ select {
   background: var(--bright-yellow);
   border-radius: var(--radius);
   padding: 4px 6px;
-  color: #5C5200;
+  color: var(--charcoal);
   font-size: 0.78rem;
   line-height: 1.2;
-  font-weight: 600;
+  font-weight: 700;
   box-shadow: var(--shadow);
   overflow: hidden;
   display: flex;
@@ -506,13 +527,6 @@ select {
   outline: 2px solid var(--bright-yellow-darker);
   outline-offset: 1px;
   z-index: 6;
-}
-.available-cta {
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  opacity: 0.8;
-  white-space: nowrap;
 }
 
 /* ============ Legend ============ */
