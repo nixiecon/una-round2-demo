@@ -429,8 +429,8 @@ select {
   position: absolute;
   left: 4px;
   right: 4px;
-  background: rgba(60, 195, 215, 0.9);    /* bright cyan — matches live site VSB */
-  color: #FFFFFF;
+  background: #1A4A42;                     /* darkest teal — clearly blocked */
+  color: var(--white);
   border-radius: var(--radius);
   padding: 4px 6px;
   font-size: 0.78rem;
@@ -438,7 +438,7 @@ select {
   font-weight: 600;
   pointer-events: none;
   z-index: 1;
-  border: 1px dashed var(--una-green-darker);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -452,7 +452,7 @@ select {
   position: absolute;
   left: 4px;
   right: 4px;
-  background: var(--bright-green);
+  background: #5A9E90;
   border-radius: var(--radius);
   padding: 4px 6px;
   color: var(--charcoal);
@@ -471,7 +471,7 @@ select {
   z-index: 0;
 }
 
-/* Booking Available — stands out against muted bookings */
+/* Booking Available — bright yellow block */
 .available-overlay {
   position: absolute;
   left: 4px;

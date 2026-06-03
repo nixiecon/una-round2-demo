@@ -71,12 +71,16 @@
   function getBookings() {
     const data = getData();
     const bookings = data.bookings || [];
+    // If using sample data (no live feed), offset all bookings to the
+    // currently displayed week so the demo always has content.
     if (!window.UNA_FIELD_LIVE_DATA) {
       return offsetBookingsToWeek(bookings, state.weekStart);
     }
     return bookings;
   }
 
+  // Shift sample bookings so they land on the displayed week.
+  // The anchor week is detected from the earliest booking's Sunday.
   let _anchorWeekStart = null;
   function offsetBookingsToWeek(bookings, targetWeekStart) {
     if (!bookings.length) return bookings;
@@ -104,14 +108,9 @@
     return `${y}-${m}-${dd}T${time}`;
   }
 
-  function getBookedColor(orgKey) {
-    const shades = getData().orgShades;
-    if (shades && orgKey && shades[orgKey]) return shades[orgKey];
-    return getData().bookedColor || '#3B7267';
-  }
-
-  function getAvailableColor() {
-    return getData().availableColor || '#E0F5ED';
+  function getOrgColor(orgKey) {
+    const colors = getData().orgColors || {};
+    return colors[orgKey] || '#3B7267';
   }
 
   function getOperatingHours() {
@@ -158,7 +157,7 @@
     renderDateRange();
     renderMobileDayTabs();
     renderGrid();
-    renderLegend();
+    if (els.legend) renderLegend();
   }
 
   function renderDateRange() {
@@ -268,7 +267,6 @@
       const allBookings = bookingsForDate(date);
       const gapBlocks = computeGapBlocks(date, allBookings, vsbBlock, startMin);
       gapBlocks.forEach(gap => {
-        // In Available-only mode, only show 'available' type gaps
         if (showAvailableOnly && gap.type !== 'available') return;
         dayCol.appendChild(renderGapBlock(gap));
       });
@@ -304,12 +302,11 @@
 
   function renderLegend() {
     els.legend.innerHTML = '';
-    const data = getData();
+    const orgs = uniqueOrgs(getBookings());
     const items = [
-      { label: 'Booked', color: data.bookedColor || '#3B7267' },
-      { label: 'Vancouver School Board', color: data.vsbColor || '#69C0E5', dashed: true },
-      { label: 'Community Play Time', color: data.communityPlayColor || '#44BC9B', dashed: true },
-      { label: 'Booking Available', color: data.availableColor || '#E0F5ED', dashed: true },
+      ...orgs.map(o => ({ label: o.label, color: getOrgColor(o.key) })),
+      { label: 'Vancouver School Board', color: '#69C0E5', dashed: true },
+      { label: 'Community Play Time', color: '#44BC9B', dashed: true },
     ];
     items.forEach(item => {
       const li = document.createElement('span');
@@ -327,8 +324,7 @@
 
   function passesFilters(booking) {
     const { status } = state.filters;
-    if (status === 'booked') return true;
-    if (status === 'open') return false;   // hide bookings when showing available only
+    if (status === 'open') return false;
     return true;
   }
 
@@ -396,7 +392,6 @@
     const opStart = hhmmToMin(op.start);
     const opEnd = hhmmToMin(op.end);
 
-    // Build a list of "occupied" intervals inside operating hours
     const occupied = [];
     bookings.forEach(b => {
       occupied.push([
@@ -412,7 +407,6 @@
     }
     occupied.sort((a, b) => a[0] - b[0]);
 
-    // Merge overlapping
     const merged = [];
     occupied.forEach(seg => {
       if (!merged.length || seg[0] > merged[merged.length - 1][1]) {
@@ -422,7 +416,6 @@
       }
     });
 
-    // Find gaps
     const rawGaps = [];
     let cursor = opStart;
     merged.forEach(seg => {
@@ -431,10 +424,6 @@
     });
     if (cursor < opEnd) rawGaps.push([cursor, opEnd]);
 
-    // Classify each gap:
-    // - Before 6 PM → Community Play Time (field open for shared community use)
-    // - 6 PM onwards → Booking Available (evening slots orgs can reserve)
-    // - Gaps ≤ 30 min between evening bookings → just an empty spacer, no label
     const EVENING = 18 * 60; // 6 PM
 
     const result = [];
@@ -444,7 +433,6 @@
         result.push({ startMin: start, endMin: end, type: 'spacer' });
         return;
       }
-      // Split gaps that cross the evening boundary
       if (start < EVENING && end > EVENING) {
         result.push({ startMin: start, endMin: EVENING, type: 'cpt' });
         result.push({ startMin: EVENING, endMin: end, type: 'available' });
@@ -471,7 +459,7 @@
     block.className = 'booking';
     block.style.top = `${top}px`;
     block.style.height = `${Math.max(height, 28)}px`;
-    block.style.background = getBookedColor(booking.orgKey);
+    block.style.background = getOrgColor(booking.orgKey);
 
     block.innerHTML = `
       <div class="booking__org">${booking.org}</div>
@@ -602,6 +590,11 @@
   }
   function formatDateLong(d) {
     return `${DAY_NAMES_LONG[d.getDay()]}, ${MONTH_NAMES_SHORT[d.getMonth()]} ${d.getDate()}`;
+  }
+  function uniqueOrgs(bookings) {
+    const seen = new Map();
+    bookings.forEach(b => seen.set(b.orgKey, b.org));
+    return Array.from(seen.entries()).map(([key, label]) => ({ key, label }));
   }
 
   // ============ Go ============

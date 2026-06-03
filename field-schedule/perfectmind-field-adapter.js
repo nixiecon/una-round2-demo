@@ -14,7 +14,7 @@
  *
  * Usage:
  *   const fieldData = window.PerfectMindFieldAdapter.transform(window.UNA_FIELD_LIVE_DATA);
- *   // → { bookings: [...], orgColors: {...}, operatingHours, vsb }
+ *   // → { bookings: [...], orgShades: {...}, operatingHours, vsb }
  *
  * CONFIRMED PerfectMind feed fields (per-session object, live 2026-06-02):
  *   Subject, CourseID, ExactTime, EndTime, Description, LocationName,
@@ -35,56 +35,57 @@
  *   Capacity      → capacity   (passthrough)
  *   Remaining     → remaining  (passthrough)
  *
- * TODO(Glenda/Tim): The confirmed shape above is from the drop-in *program*
- * feed. Field RENTALS may populate the renting org in `Subject` (most likely)
- * or in a different field. Confirm which field carries the org/team name for
- * field bookings, then adjust the `org` source + ORG_KEY_LOOKUP keys.
+ * NOTE(Glenda/Tim): Colors are now auto-generated per unique org, so the
+ * palette no longer depends on confirming anything in advance. The only open
+ * question is the on-block LABEL: field RENTALS may carry the renting-org name
+ * in `Subject` (most likely) or another field. If labels read wrong, point the
+ * `org` source (in transform below) at the correct field — no color changes.
  * ====================================================================== */
 
 (function () {
   'use strict';
 
-  // ----- Org normalization -----
-  // Map known org names to their colorKey. Add Glenda's confirmed mapping
-  // here once she signs off on the palette.
-  const ORG_KEY_LOOKUP = {
-    'una':                  'una',
-    'una flag football':    'una',
-    'una training':         'una',
-    'vancouver school board': 'vsb',
-    'vsb':                  'vsb',
-    'vancouver united fc':  'vufc',
-    'vancouver united':     'vufc',
-    'ubc metropolitan fc':  'ubcmet',
-    'ubc metropolitan':     'ubcmet',
-    'vl-be fc':             'vlbe',
-    'vl-be':                'vlbe',
-    'soccer movement fc':   'soccermovement',
-    'soccer movement':      'soccermovement',
-    'memorial tournament':  'memorial',
-  };
-
-  // Default placeholder palette. Glenda picks the final colors.
-  const DEFAULT_ORG_COLORS = {
-    "una":             "#3B7267",
-    "vsb":             "#69C0E5",
-    "vufc":            "#015990",
-    "ubcmet":          "#0A2B3F",
-    "vlbe":            "#9C9C9C",
-    "soccermovement":  "#B3B3B3",
-    "memorial":        "#1A1A1A",
-    "communityPlay":   "#44BC9B",
-  };
-
+  // ----- Org normalization (no hardcoded org list) -----
+  // Every distinct org name becomes its own stable key; colors are generated,
+  // not mapped. Adding a new renting org needs zero code changes.
   function deriveOrgKey(rawOrg) {
     if (!rawOrg) return 'other';
-    const norm = String(rawOrg).toLowerCase().trim()
+    const slug = String(rawOrg).toLowerCase().trim()
       .replace(/[^a-z0-9 ]/g, ' ')
       .replace(/\s+/g, ' ')
-      .trim();
-    if (ORG_KEY_LOOKUP[norm]) return ORG_KEY_LOOKUP[norm];
-    // Fallback: hash to a stable key based on first letters
-    return 'org_' + norm.replace(/\s+/g, '_').substring(0, 16);
+      .trim()
+      .replace(/ /g, '_');
+    return slug || 'other';
+  }
+
+  // ----- Auto-assigned teal shades -----
+  // Each unique org gets its own shade of teal, spread evenly across a
+  // readable band so they stay distinct and white block-text stays legible.
+  // Deterministic (same orgs → same shades, no flicker between renders) rather
+  // than truly random, so two orgs can't collide onto an identical color.
+  function hslToHex(h, s, l) {
+    s /= 100; l /= 100;
+    const a = s * Math.min(l, 1 - l);
+    const f = function (n) {
+      const k = (n + h / 30) % 12;
+      const c = l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+      return Math.round(255 * c).toString(16).padStart(2, '0');
+    };
+    return '#' + f(0) + f(8) + f(4);
+  }
+
+  function buildOrgShades(orgKeys) {
+    const keys = orgKeys.slice().sort();
+    const n = keys.length;
+    const shades = {};
+    keys.forEach(function (key, i) {
+      const t = n > 1 ? i / (n - 1) : 0;        // 0..1 across the org set
+      const hue   = 168 + Math.round(t * 8);     // 168..176, stays teal
+      const sat   = 46  - Math.round(t * 8);     // 46..38
+      const light = 24  + Math.round(t * 28);    // 24..52, dark→mid teal
+      shades[key] = hslToHex(hue, sat, light);
+    });
+    return shades;
   }
 
   // ----- Time parsing -----
@@ -140,7 +141,7 @@
 
   function transform(rawEvents) {
     if (!Array.isArray(rawEvents)) {
-      return { bookings: [], orgColors: DEFAULT_ORG_COLORS };
+      return { bookings: [], orgShades: {} };
     }
 
     const bookings = rawEvents.map(function (raw) {
@@ -170,9 +171,19 @@
       };
     }).filter(function (b) { return b !== null; });
 
+    // Collect every distinct org and auto-assign a teal shade to each.
+    const uniqueKeys = [];
+    bookings.forEach(function (b) {
+      if (b.orgKey && uniqueKeys.indexOf(b.orgKey) === -1) uniqueKeys.push(b.orgKey);
+    });
+
     return {
       bookings: bookings,
-      orgColors: DEFAULT_ORG_COLORS,
+      orgShades: buildOrgShades(uniqueKeys),
+      bookedColor:        "#3B7267",
+      vsbColor:           "#B2E8D4",
+      communityPlayColor: "#44BC9B",
+      availableColor:     "#F5E06B",
       operatingHours: { start: "09:00", end: "22:00" },
       vsb: {
         days: [1, 2, 3, 4, 5],
@@ -188,6 +199,7 @@
   window.PerfectMindFieldAdapter = {
     transform: transform,
     _deriveOrgKey: deriveOrgKey,
+    _buildOrgShades: buildOrgShades,
     _parseExactTime: parseExactTime,
     _parseEndTime: parseEndTime,
   };
