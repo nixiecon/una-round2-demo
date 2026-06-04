@@ -29,7 +29,7 @@
   // exact day + time they clicked). Configure the inbox + subject here. The page
   // can override the recipient at runtime via window.UNA_FIELD_BOOKING_EMAIL.
   const BOOKING_CONFIG = {
-    email:   'communications@myuna.ca',   // TODO(confirm with Glenda): the field-booking inbox
+    email:   'bookings@myuna.ca',   // confirmed by Glenda 2026-06-03
     subject: 'Community Field Booking Inquiry',
   };
 
