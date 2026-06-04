@@ -176,10 +176,12 @@
         render();
       });
     }
-    els.mobileFiltersToggle.addEventListener('click', () => {
-      const open = els.filtersPanel.classList.toggle('is-open');
-      els.mobileFiltersToggle.setAttribute('aria-expanded', String(open));
-    });
+    if (els.mobileFiltersToggle && els.filtersPanel) {
+      els.mobileFiltersToggle.addEventListener('click', () => {
+        const open = els.filtersPanel.classList.toggle('is-open');
+        els.mobileFiltersToggle.setAttribute('aria-expanded', String(open));
+      });
+    }
     document.querySelectorAll('[data-close-sheet]').forEach(btn => {
       btn.addEventListener('click', closeMobileSheet);
     });

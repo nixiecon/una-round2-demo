@@ -157,6 +157,13 @@ select {
   color: var(--una-green);
 }
 
+/* Single-checkbox filter: no beige bar, just a small unobtrusive control */
+.filters--single {
+  background: none;
+  padding: 0;
+  margin-bottom: 10px;
+}
+
 /* Compact checkbox filter — sits left, doesn't stretch like the dropdowns */
 .filter--checkbox {
   flex: 0 0 auto;
@@ -613,6 +620,7 @@ select {
 @media (max-width: 767px) {
   .filters { display: none; flex-direction: column; }
   .filters.is-open { display: flex; }
+  .filters--single { display: flex; flex-direction: row; }  /* single checkbox: always visible, no toggle */
   .mobile-filters-toggle { display: flex; }
   .mobile-day-tabs { display: flex; }
 
