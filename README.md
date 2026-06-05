@@ -1,28 +1,21 @@
-# UNA Round 2 — Prototype Demos
+# UNA Community Field Schedule — Prototype
 
-Public demo of three redesign prototypes for [myuna.ca](https://myuna.ca), built as a follow-up to the [Drop-In Calendar redesign](https://nixiecon.github.io/una-dropin-calendar-demo/).
+Public demo of the Community Field Schedule redesign for [myuna.ca](https://myuna.ca), built as a follow-up to the [Drop-In Calendar redesign](https://nixiecon.github.io/una-dropin-calendar-demo/).
 
-**Live demo:** https://nixiecon.github.io/una-round2-demo/
+**Live demo:** https://nixiecon.github.io/una-round2-demo/field-schedule/
 
 ## Contents
 
 | Page | Path | Replaces |
 |---|---|---|
 | Community Field Schedule | [`/field-schedule/`](./field-schedule/) | `myuna.ca/bookings/` |
-| Events Calendar — month grid | [`/events-calendar/month-grid.html`](./events-calendar/month-grid.html) | `myuna.ca/events/` (month view) |
-| Single Event Page CSS | [`/events-calendar/single-event/preview.html`](./events-calendar/single-event/preview.html) | individual `/event/...` pages |
 
 ## Tech
 
-Vanilla HTML / CSS / JS. No build step. No framework. Brand tokens (`--una-green`, `--bright-yellow-lighter`, etc.) copied from the Drop-In Calendar so the visual language is consistent across all four prototypes.
+Vanilla HTML / CSS / JS. No build step. No framework. Brand tokens (`--una-green`, `--bright-yellow-lighter`, etc.) copied from the Drop-In Calendar so the visual language is consistent.
 
-- **Field Schedule** pulls from PerfectMind via a forked adapter (`perfectmind-field-adapter.js`).
-- **Events Calendar** pulls from The Events Calendar plugin's public WP REST endpoint (`/wp-json/tribe/events/v1/events`).
-- **Single Event Page** is CSS-only — no PHP, no template overrides; drops into Customizer → Additional CSS.
+The Field Schedule pulls from PerfectMind via a forked adapter (`perfectmind-field-adapter.js`). Same integration pattern as the live Drop-In Calendar: the WordPress/PHP layer fetches PerfectMind server-side and injects the feed as a global JS array (`window.UNA_FIELD_LIVE_DATA`), then the vanilla-JS renderer draws it client-side. No runtime fetch.
 
 ## Status
 
-- **Field Schedule** — full prototype, ready for Glenda review.
-- **Events Calendar (month grid + single event)** — preview only, direction-check. Final implementation paused until the Drop-In Calendar ships in WordPress; we'll mirror that PHP integration pattern for these.
-
-Color assignments and a handful of design decisions are placeholders — see `events-calendar/QUESTIONS-FOR-GLENDA.md`.
+Full prototype, ready for review. Color assignments and a handful of design decisions are placeholders pending Glenda's sign-off.
