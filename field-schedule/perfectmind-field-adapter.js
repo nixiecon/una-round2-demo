@@ -147,8 +147,8 @@
       bookings: bookings,
       // Three-bucket UNA brand colours (Glenda 2026-06-03):
       internalColor:  "#3B7267",   // UNA Green — UNA programs (Community Play Time, Training)
-      externalColor:  "#D9D9D9",   // Muted light grey — non-UNA orgs (VSB, clubs); recedes behind UNA + Open to Book
-      availableColor: "#E9E980",   // Bright Yellow Accent — "Open to Book"
+      externalColor:  "#E8E8E8",   // Muted grey (UNA palette) — non-UNA orgs (VSB, clubs); recedes behind UNA + Open to Book
+      availableColor: "#F7F7CC",   // Bright Yellow Accent Lighter (UNA palette) — muted "Open to Book"
       operatingHours: { start: "09:00", end: "22:00" },
       vsb: {
         days: [1, 2, 3, 4, 5],

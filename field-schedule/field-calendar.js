@@ -123,19 +123,19 @@
     return /^una\b/i.test(String(org || '').trim()) ? 'internal' : 'external';
   }
   function getInternalColor() { return getData().internalColor || '#3B7267'; }
-  function getExternalColor() { return getData().externalColor || '#D9D9D9'; }
+  function getExternalColor() { return getData().externalColor || '#E8E8E8'; }
   function getBookedColor(booking) {
     return bucketForOrg(booking.org) === 'internal'
       ? getInternalColor()
       : getExternalColor();
   }
-  // UNA green is dark (white text); bright green is light (charcoal text).
+  // UNA green is dark (white text); muted grey is light (dark-text-grey).
   function getBookedTextColor(booking) {
-    return bucketForOrg(booking.org) === 'internal' ? '#FFFFFF' : '#1A1A1A';
+    return bucketForOrg(booking.org) === 'internal' ? '#FFFFFF' : '#414042';
   }
 
   function getAvailableColor() {
-    return getData().availableColor || '#E9E980';
+    return getData().availableColor || '#F7F7CC';
   }
 
   function getOperatingHours() {
@@ -343,8 +343,8 @@
     const data = getData();
     const items = [
       { label: 'UNA (Community Play & Training)', color: data.internalColor || '#3B7267' },
-      { label: 'Other Bookings (VSB, clubs)', color: data.externalColor || '#D9D9D9' },
-      { label: 'Open to Book', color: data.availableColor || '#E9E980' },
+      { label: 'Other Bookings (VSB, clubs)', color: data.externalColor || '#E8E8E8' },
+      { label: 'Open to Book', color: data.availableColor || '#F7F7CC' },
     ];
     items.forEach(item => {
       const li = document.createElement('span');
@@ -531,8 +531,8 @@
     div.className = 'vsb-overlay';
     div.style.top = `${top}px`;
     div.style.height = `${height}px`;
-    div.style.background = getExternalColor();   // VSB is an external booking
-    div.style.color = '#1A1A1A';                 // charcoal text on bright green
+    div.style.background = getExternalColor();   // VSB is a non-UNA booking → muted grey
+    div.style.color = '#414042';                 // dark-text-grey on muted grey
     div.innerHTML = '<div class="booking__org">Vancouver School Board</div><div class="booking__time">' + timeStr + '</div>';
     return div;
   }

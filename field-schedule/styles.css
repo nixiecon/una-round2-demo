@@ -85,29 +85,33 @@ select {
 .cal-header {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   flex-wrap: wrap;
   gap: 16px;
   margin-bottom: 16px;
+  background: var(--una-green);
+  color: var(--white);
+  padding: 16px 24px;
+  border-radius: var(--radius-lg);
 }
 
 .cal-title {
   margin: 0;
   font-size: clamp(1.5rem, 2.5vw, 2rem);
   font-weight: 700;
-  color: var(--una-green);
+  color: var(--white);
   line-height: 1.15;
 }
 
 .cal-title-sep {
-  color: var(--grey-200);
+  color: rgba(255, 255, 255, 0.5);
   font-weight: 400;
   margin: 0 8px;
 }
 
 #date-range {
   font-weight: 500;
-  color: var(--text);
+  color: var(--white);
 }
 
 /* ============ Schedule note ============ */
