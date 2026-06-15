@@ -315,7 +315,9 @@ select {
   border-color: var(--una-green);
 }
 .nav-btn-today:hover {
-  background: var(--una-green-darker);
+  background: var(--bright-green);          /* match the "today" column highlight green */
+  color: var(--charcoal);
+  border-color: var(--bright-green);
 }
 
 /* ============ Mobile day-tab strip ============ */
