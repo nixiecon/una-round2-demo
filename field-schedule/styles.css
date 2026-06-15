@@ -389,7 +389,7 @@ select {
 .day-header .day-date { font-size: 1rem; font-weight: 700; }
 .day-header.is-today {
   background: var(--bright-green);
-  color: var(--charcoal);
+  color: var(--white);
 }
 
 /* Top-left cell above time column */
