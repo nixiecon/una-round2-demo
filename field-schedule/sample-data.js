@@ -51,7 +51,7 @@ window.UNA_FIELD_SAMPLE_DATA = {
 
   // Three-bucket UNA brand colours (Glenda 2026-06-03)
   internalColor:  "#3B7267",   // UNA Green — UNA programs
-  externalColor:  "#44BC9B",   // Bright Green Accent — external orgs (VSB, clubs)
+  externalColor:  "#9CA3AF",   // Neutral grey — non-UNA orgs (VSB, clubs); only UNA + Open to Book get color
   availableColor: "#E9E980",   // Bright Yellow Accent — "Open to Book"
 
   operatingHours: { start: "09:00", end: "22:00" },

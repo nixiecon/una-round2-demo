@@ -123,7 +123,7 @@
     return /^una\b/i.test(String(org || '').trim()) ? 'internal' : 'external';
   }
   function getInternalColor() { return getData().internalColor || '#3B7267'; }
-  function getExternalColor() { return getData().externalColor || '#44BC9B'; }
+  function getExternalColor() { return getData().externalColor || '#9CA3AF'; }
   function getBookedColor(booking) {
     return bucketForOrg(booking.org) === 'internal'
       ? getInternalColor()
@@ -343,7 +343,7 @@
     const data = getData();
     const items = [
       { label: 'UNA (Community Play & Training)', color: data.internalColor || '#3B7267' },
-      { label: 'External Bookings (VSB, clubs)', color: data.externalColor || '#44BC9B' },
+      { label: 'Other Bookings (VSB, clubs)', color: data.externalColor || '#9CA3AF' },
       { label: 'Open to Book', color: data.availableColor || '#E9E980' },
     ];
     items.forEach(item => {
